@@ -12,9 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
 
-@Component
+//@Component
 public class DiscordBot {
     @Value("${discord.token}")
     private String token;
@@ -45,6 +44,11 @@ public class DiscordBot {
 
         categories = guild.getCategories();
         textChannels = guild.getTextChannels();
+
+    }
+
+    public Guild getGuild(){
+        return guild;
     }
 
     public Category getCategory(String name){

@@ -1,12 +1,14 @@
 package com.example.JDDB.app;
 
+
+import com.example.JDDB.lib.DiscordRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    private final UserRepository userRepository;
+    private final DiscordRepository<User, Long> userRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(DiscordRepository<User, Long> userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -16,6 +18,7 @@ public class UserService {
         user.setAge(20);
         user.setEmail("example@email.com");
 
-        userRepository.save(user);
+        userRepository.test(user);
+//        userRepository.save(user);
     }
 }
