@@ -11,7 +11,7 @@ public class RepositoryInitializer<T, ID> {
     protected final DbConnection<T, ID> dbConnection;
 
     public RepositoryInitializer(Class<T> clazz){
-        dbConnection = new DbConnection();
+        dbConnection = new DbConnection<>(clazz);
 
         if (clazz.isAnnotationPresent(Table.class)){
             TABLE_NAME = clazz

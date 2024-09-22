@@ -1,5 +1,6 @@
 package com.example.JDDB.lib.core.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 public class DiscordRepository<T, ID>
@@ -16,13 +17,13 @@ public class DiscordRepository<T, ID>
     }
 
     @Override
-    public Iterable<T> saveAll(Iterable<T> entities) {
-        return null;
+    public Iterable<T> saveAll(List<T> entities) {
+        return dbConnection.saveEntities(TABLE_NAME, entities);
     }
 
     @Override
     public Optional<T> findById(ID id) {
-        return Optional.empty();
+        return dbConnection.findEntityById(TABLE_NAME, id);
     }
 
     @Override
@@ -32,7 +33,7 @@ public class DiscordRepository<T, ID>
 
     @Override
     public Iterable<T> findAll() {
-        return null;
+        return dbConnection.findAllEntities(TABLE_NAME);
     }
 
     @Override

@@ -1,12 +1,13 @@
 package com.example.JDDB.lib.core.repository;
 
 
+import java.util.List;
 import java.util.Optional;
 
 public interface RepositoryMethods<T, ID>{
     T save(T entity);
 
-    Iterable<T> saveAll(Iterable<T> entities);
+    Iterable<T> saveAll(List<T> entities);
 
     Optional<T> findById(ID id);
 

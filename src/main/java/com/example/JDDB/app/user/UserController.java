@@ -1,11 +1,9 @@
 package com.example.JDDB.app.user;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/api")
+@RequestMapping(path = "/api/user")
 public class UserController {
     private final UserService userService;
 
@@ -13,8 +11,13 @@ public class UserController {
         this.userService = serverService;
     }
 
-    @GetMapping(path = "/user")
-    public User addUser(){
-        return userService.addUser();
+    @PostMapping
+    public User addUser(@RequestBody User user){
+        return userService.addUser(user);
+    }
+
+    @GetMapping
+    public User getUserById(@RequestParam("id") String id){
+        return userService.getUserById(id);
     }
 }

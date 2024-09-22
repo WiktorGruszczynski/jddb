@@ -1,6 +1,7 @@
 package com.example.JDDB.lib.core;
 
 import com.example.JDDB.lib.tools.PropertyManager;
+import jakarta.annotation.Nonnull;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -129,13 +130,15 @@ public class DiscordBot {
         return null;
     }
 
-    public static Message getMessageById(Long id, Long textChannelId){
-        return guild.getTextChannelById(textChannelId)
-                .getHistory()
-                .getMessageById(id);
+    public static Message getMessageById(@Nonnull String id, @Nonnull TextChannel textChannel){
+        return textChannel.retrieveMessageById(id).complete();
     }
 
     public static Message sendPlainMessage(TextChannel textChannel, String text){
         return textChannel.sendMessage(text).complete();
+    }
+
+    public static <T> Iterable<T> getAllMessages() {
+        return null;
     }
 }

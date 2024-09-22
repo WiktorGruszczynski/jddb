@@ -15,17 +15,11 @@ public class UserService {
     }
 
 
-    public User addUser() {
-        User user = userRepository.save(
-                new User(
-                        "Josh",
-                        "josh@mail.com",
-                        35
-                )
-        );
+    public User addUser(User user) {
+        return userRepository.save(user);
+    }
 
-        System.out.println(user.getId());
-
-        return user;
+    public User getUserById(String id) {
+        return userRepository.findById(id).orElse(null);
     }
 }

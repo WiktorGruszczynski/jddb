@@ -5,18 +5,13 @@ import org.springframework.data.annotation.Id;
 
 @Table(name = "user")
 public class User {
+
+
     @Id
     private String id;
     private String name;
     private String email;
     private Integer age;
-
-
-    public User(String name, String email, Integer age) {
-        this.name = name;
-        this.email = email;
-        this.age = age;
-    }
 
 
     public String getId() {
