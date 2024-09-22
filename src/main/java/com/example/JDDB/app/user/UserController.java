@@ -2,6 +2,8 @@ package com.example.JDDB.app.user;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/api/user")
 public class UserController {
@@ -20,4 +22,10 @@ public class UserController {
     public User getUserById(@RequestParam("id") String id){
         return userService.getUserById(id);
     }
+
+    @GetMapping(path = "/getAll")
+    public List<User> getAll(){
+        return userService.getAll();
+    }
+
 }

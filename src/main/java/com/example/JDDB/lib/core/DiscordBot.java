@@ -138,7 +138,11 @@ public class DiscordBot {
         return textChannel.sendMessage(text).complete();
     }
 
-    public static <T> Iterable<T> getAllMessages() {
-        return null;
+    public static List<Message> getAllMessages(TextChannel textChannel) {
+        return textChannel.getHistoryFromBeginning(100).complete().getRetrievedHistory();
+    }
+
+    public static void deleteMessageById(TextChannel textChannel, String id){
+        textChannel.deleteMessageById(id).complete();
     }
 }

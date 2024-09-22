@@ -28,11 +28,11 @@ public class DiscordRepository<T, ID>
 
     @Override
     public boolean existsById(ID id) {
-        return false;
+        return dbConnection.existsById(TABLE_NAME, id);
     }
 
     @Override
-    public Iterable<T> findAll() {
+    public List<T> findAll() {
         return dbConnection.findAllEntities(TABLE_NAME);
     }
 
@@ -43,7 +43,7 @@ public class DiscordRepository<T, ID>
 
     @Override
     public void deleteById(ID id) {
-
+        dbConnection.deleteById(TABLE_NAME, id);
     }
 
     @Override
@@ -59,6 +59,11 @@ public class DiscordRepository<T, ID>
     @Override
     public void deleteAll(Iterable<T> entities) {
 
+    }
+
+    @Override
+    public <R> R executeQuery(String query) {
+        return null;
     }
 
 

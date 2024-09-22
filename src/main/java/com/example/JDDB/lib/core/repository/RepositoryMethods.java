@@ -24,4 +24,6 @@ public interface RepositoryMethods<T, ID>{
     void deleteAll();
 
     void deleteAll(Iterable<T> entities);
+
+    <R> R executeQuery(String query);
 }

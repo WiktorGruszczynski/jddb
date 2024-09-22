@@ -8,10 +8,7 @@ import org.springframework.data.annotation.Id;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 public class DbConnection<T, ID> {
@@ -28,7 +25,8 @@ public class DbConnection<T, ID> {
             Date.class
     );
     private final Class<T> clazz;
-    private Category tablesCategory;
+    private final Category tablesCategory;
+
 
     public DbConnection(Class<T> clazz) {
         this.clazz = clazz;
@@ -38,10 +36,11 @@ public class DbConnection<T, ID> {
 
     public void createTable(String tableName){
         DiscordBot.createTextChannel(
-                DiscordBot.getCategory("tables"),
+                tablesCategory,
                 tableName
         );
     }
+
 
     public boolean tableExists(String tableName){
         return DiscordBot.isTextChannel(
@@ -49,13 +48,36 @@ public class DbConnection<T, ID> {
         );
     }
 
-    private boolean isAllowedType(Object value){
-        return allowedTypes.contains(
-                value.getClass()
-        );
+
+    private boolean isAllowedType(Class<?> clazz){
+        return allowedTypes.contains(clazz);
     }
 
-    private <E> String generateMessageContent(E entity){
+
+    private boolean isAllowedType(Object value){
+        return isAllowedType(value.getClass());
+    }
+
+    private String getStringValue(Object obj){
+        if (obj instanceof Boolean value){
+            if (value){
+                return "1";
+            }
+            else {
+                return "0";
+            }
+        }
+        else if (obj instanceof Date date){
+            return String.valueOf(
+                    date.getTime()
+            );
+        }
+        else {
+            return String.valueOf(obj);
+        }
+    }
+
+    private String generateMessageContent(T entity){
         StringBuilder buffer = new StringBuilder();
 
         for (Field field: entity.getClass().getDeclaredFields()){
@@ -81,7 +103,7 @@ public class DbConnection<T, ID> {
                         throw new IllegalArgumentException();
                     }
 
-                    String value = String.valueOf(obj);
+                    String value = getStringValue(obj);
 
                     buffer
                             .append(value.length())
@@ -97,7 +119,8 @@ public class DbConnection<T, ID> {
         return buffer.toString();
     }
 
-    private <E> E updateEntityId(Long id, E entity){
+
+    private T updateEntityId(Long id, T entity){
         for (Field field: entity.getClass().getDeclaredFields()){
             try {
                 if (field.isAnnotationPresent(Id.class)){
@@ -126,6 +149,7 @@ public class DbConnection<T, ID> {
         return entity;
     }
 
+
     public T saveEntity(String tableName, T entity){
         String msgContent = generateMessageContent(entity);
 
@@ -134,6 +158,7 @@ public class DbConnection<T, ID> {
 
         return updateEntityId(message.getIdLong(), entity);
     }
+
 
     public List<T> saveEntities(String tableName, List<T> entities){
         List<Thread> queue = new ArrayList<>();
@@ -201,42 +226,75 @@ public class DbConnection<T, ID> {
         return tokens;
     }
 
-    private T decodeEntity(Message message){
-        try {
-            int iterator = 0;
-            List<String> tokens = getTokens(message.getContentRaw());
-            Constructor<?> constructor = clazz.getConstructors()[0];
-            String id = message.getId();
+    private void injectId(T entity, Field field, String id) throws IllegalAccessException {
+        Class<?> type = field.getType();
 
+        if (type == Long.class){
+            field.set(entity, Long.valueOf(id));
+        }
+        else if (type == String.class){
+            field.set(entity, id);
+        }
+        else {
+            throw new RuntimeException("Id type must be either Long or String");
+        }
+    }
+
+    private void injectField(T entity, Field field, String strValue) throws IllegalAccessException {
+        Class<?> type = field.getType();
+
+        if (!isAllowedType(type)){
+            throw new RuntimeException("Type not allowed");
+        }
+
+        if (type == String.class){
+            field.set(entity, strValue);
+        }
+        else if (type == Character.class){
+            field.set(entity, strValue.charAt(0));
+        }
+        else if (type == Boolean.class){
+            field.set(entity, strValue.equals("1"));
+        }
+        else if (type == Byte.class){
+            field.set(entity, Byte.valueOf(strValue));
+        }
+        else if (type == Short.class){
+            field.set(entity, Short.valueOf(strValue));
+        }
+        else if (type == Integer.class){
+            field.set(entity, Integer.valueOf(strValue));
+        }
+        else if (type == Long.class){
+            field.set(entity, Long.valueOf(strValue));
+        }
+        else if (type == Float.class){
+            field.set(entity, Float.valueOf(strValue));
+        }
+        else if (type == Double.class){
+            field.set(entity, Double.valueOf(strValue));
+        }
+        else if (type == Date.class){
+            field.set(entity, new Date(Long.parseLong(strValue)));
+        }
+    }
+
+    private T decodeEntity(Message message){
+        List<String> tokens = getTokens(message.getContentRaw());
+        Constructor<?> constructor = clazz.getConstructors()[0];
+        int iterator = 0;
+
+        try {
             T newEntity = (T) constructor.newInstance(new Object[constructor.getParameterCount()]);
 
             for (Field field: clazz.getDeclaredFields()){
                 field.setAccessible(true);
-                Class<?> type = field.getType();
 
                 if (field.isAnnotationPresent(Id.class)){
-                    if (type == Long.class){
-                        field.set(newEntity, Long.valueOf(id));
-                    }
-                    else if (type == String.class){
-                        field.set(newEntity, id);
-                    }
-                    else {
-                        throw new RuntimeException("Id type must be either Long or String");
-                    }
+                    injectId(newEntity, field, message.getId());
                 }
                 else{
-                    String value = tokens.get(iterator);
-
-                    if (type == Integer.class){
-                        field.set(
-                                newEntity, Integer.valueOf(value)
-                        );
-                    }
-                    else if (type == String.class){
-                        field.set(newEntity, tokens.get(iterator));
-                    }
-
+                    injectField(newEntity, field, tokens.get(iterator));
                     iterator++;
                 }
             }
@@ -259,11 +317,7 @@ public class DbConnection<T, ID> {
             return Optional.empty();
         }
 
-        Message message = DiscordBot.getMessageById(
-                String.valueOf(id),
-                textChannel
-        );
-
+        Message message = DiscordBot.getMessageById(String.valueOf(id), textChannel);
 
         if (message == null){
             return Optional.empty();
@@ -274,7 +328,33 @@ public class DbConnection<T, ID> {
         );
     }
 
-    public Iterable<T> findAllEntities(String tableName) {
-        return DiscordBot.getAllMessages();
+    public List<T> findAllEntities(String tableName) {
+        TextChannel textChannel = DiscordBot.getTextChannel(tablesCategory, tableName);
+        List<T> entities = new ArrayList<>();
+
+        for (Message message: DiscordBot.getAllMessages(textChannel)){
+            entities.add(
+                    decodeEntity(message)
+            );
+        }
+
+        return entities;
+    }
+
+    public boolean existsById(String tableName, ID id){
+        return DiscordBot.getMessageById(
+                String.valueOf(id),
+                Objects.requireNonNull(
+                        DiscordBot.getTextChannel(tablesCategory, tableName)
+                )
+        ) != null;
+    }
+
+    public void deleteById(String tableName, ID id) {
+        TextChannel textChannel = DiscordBot.getTextChannel(tablesCategory, tableName);
+
+        if (textChannel!=null){
+            DiscordBot.deleteMessageById(textChannel, String.valueOf(id));
+        }
     }
 }
