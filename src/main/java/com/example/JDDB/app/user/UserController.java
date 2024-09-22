@@ -1,4 +1,4 @@
-package com.example.JDDB.app;
+package com.example.JDDB.app.user;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +14,7 @@ public class UserController {
     }
 
     @GetMapping(path = "/user")
-    public void addUser(){
-        userService.addUser();
+    public User addUser(){
+        return userService.addUser();
     }
 }

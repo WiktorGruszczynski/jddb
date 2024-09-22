@@ -1,0 +1,26 @@
+package com.example.JDDB.lib.core.repository;
+
+
+import java.util.Optional;
+
+public interface RepositoryMethods<T, ID>{
+    T save(T entity);
+
+    Iterable<T> saveAll(Iterable<T> entities);
+
+    Optional<T> findById(ID id);
+
+    boolean existsById(ID id);
+
+    Iterable<T> findAll();
+
+    long count();
+
+    void deleteById(ID id);
+
+    void delete(T entity);
+
+    void deleteAll();
+
+    void deleteAll(Iterable<T> entities);
+}

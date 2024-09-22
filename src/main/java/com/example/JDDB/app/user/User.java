@@ -1,4 +1,4 @@
-package com.example.JDDB.app;
+package com.example.JDDB.app.user;
 
 import com.example.JDDB.lib.annotations.Table;
 import org.springframework.data.annotation.Id;
@@ -6,14 +6,24 @@ import org.springframework.data.annotation.Id;
 @Table(name = "user")
 public class User {
     @Id
-    private Long id;
+    private String id;
     private String name;
+    private String email;
+    private Integer age;
 
-    public Long getId() {
+
+    public User(String name, String email, Integer age) {
+        this.name = name;
+        this.email = email;
+        this.age = age;
+    }
+
+
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -40,9 +50,6 @@ public class User {
     public void setAge(Integer age) {
         this.age = age;
     }
-
-    private String email;
-    private Integer age;
 
     @Override
     public String toString() {
