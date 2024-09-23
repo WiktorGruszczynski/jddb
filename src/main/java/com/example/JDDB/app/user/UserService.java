@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 public class UserService {
-    private final DiscordRepository<User, String> userRepository;
+    private final DiscordRepository<User> userRepository;
 
     public UserService() {
         this.userRepository = new DiscordRepository<>(User.class);

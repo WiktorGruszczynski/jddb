@@ -1,6 +1,6 @@
 package com.example.JDDB.lib.core;
 
-import com.example.JDDB.lib.tools.PropertyManager;
+import com.example.JDDB.lib.utils.PropertyManager;
 import jakarta.annotation.Nonnull;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.messages.MessagePoll;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 

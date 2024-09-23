@@ -3,9 +3,9 @@ package com.example.JDDB.lib.core.repository;
 import java.util.List;
 import java.util.Optional;
 
-public class DiscordRepository<T, ID>
-        extends RepositoryInitializer<T, ID>
-        implements RepositoryMethods<T,ID> {
+public class DiscordRepository<T>
+        extends RepositoryInitializer<T>
+        implements RepositoryMethods<T> {
 
     public DiscordRepository(Class<T> clazz) {
         super(clazz);
@@ -22,12 +22,12 @@ public class DiscordRepository<T, ID>
     }
 
     @Override
-    public Optional<T> findById(ID id) {
+    public Optional<T> findById(String id) {
         return dbConnection.findEntityById(TABLE_NAME, id);
     }
 
     @Override
-    public boolean existsById(ID id) {
+    public boolean existsById(String id) {
         return dbConnection.existsById(TABLE_NAME, id);
     }
 
@@ -42,7 +42,7 @@ public class DiscordRepository<T, ID>
     }
 
     @Override
-    public void deleteById(ID id) {
+    public void deleteById(String id) {
         dbConnection.deleteById(TABLE_NAME, id);
     }
 

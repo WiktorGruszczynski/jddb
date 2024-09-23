@@ -6,9 +6,9 @@ import org.springframework.data.annotation.Id;
 
 import java.lang.reflect.Field;
 
-public class RepositoryInitializer<T, ID> {
+public class RepositoryInitializer<T> {
     protected final String TABLE_NAME;
-    protected final DbConnection<T, ID> dbConnection;
+    protected final DbConnection<T> dbConnection;
 
     public RepositoryInitializer(Class<T> clazz){
         dbConnection = new DbConnection<>(clazz);

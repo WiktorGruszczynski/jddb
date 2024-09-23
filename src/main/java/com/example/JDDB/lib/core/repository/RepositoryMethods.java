@@ -4,20 +4,20 @@ package com.example.JDDB.lib.core.repository;
 import java.util.List;
 import java.util.Optional;
 
-public interface RepositoryMethods<T, ID>{
+public interface RepositoryMethods<T>{
     T save(T entity);
 
     Iterable<T> saveAll(List<T> entities);
 
-    Optional<T> findById(ID id);
+    Optional<T> findById(String id);
 
-    boolean existsById(ID id);
+    boolean existsById(String id);
 
     Iterable<T> findAll();
 
     long count();
 
-    void deleteById(ID id);
+    void deleteById(String id);
 
     void delete(T entity);
 

@@ -46,4 +46,16 @@ public class PersonalData {
     private Boolean married;
     private Integer salary;
     private Date birthday;
+
+    @Override
+    public String toString() {
+        return "PersonalData{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", married=" + married +
+                ", salary=" + salary +
+                ", birthday=" + birthday +
+                '}';
+    }
 }
