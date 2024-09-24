@@ -1,12 +1,11 @@
 package com.example.JDDB.app.user;
 
+import com.example.JDDB.lib.annotations.Id;
 import com.example.JDDB.lib.annotations.Table;
-import org.springframework.data.annotation.Id;
+
 
 @Table(name = "user")
 public class User {
-
-
     @Id
     private String id;
     private String name;

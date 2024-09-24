@@ -15,10 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 public class DiscordBot {
     private static String token;
     private static Long guildId;
     private final static String TABLES = "tables";
+    private final static String COUNTERS = "counters";
 
     private static Guild guild;
     private final static List<Category> categories = new ArrayList<>();
@@ -62,9 +64,11 @@ public class DiscordBot {
         if (!isCategory(TABLES)){
             createCategory(TABLES);
         }
+
+        if (!isCategory(COUNTERS)){
+            createCategory(COUNTERS);
+        }
     }
-
-
 
 
     public static boolean isCategory(String categoryName){
@@ -119,6 +123,7 @@ public class DiscordBot {
     public static TextChannel getTextChannel(Category category, String channelName){
         for (TextChannel textChannel: textChannels){
             String name = textChannel.getName();
+
             Category parentCategory = textChannel.getParentCategory();
 
             if (name.equals(channelName) && parentCategory!=null && parentCategory.equals(category)){
@@ -133,7 +138,7 @@ public class DiscordBot {
         return textChannel.retrieveMessageById(id).complete();
     }
 
-    public static Message sendPlainMessage(TextChannel textChannel, String text){
+    public static Message sendPlainMessage(String text, TextChannel textChannel){
         return textChannel.sendMessage(text).complete();
     }
 

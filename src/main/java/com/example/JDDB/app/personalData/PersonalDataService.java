@@ -7,11 +7,12 @@ import java.util.Date;
 
 @Service
 public class PersonalDataService {
-    private final DiscordRepository<PersonalData> personalDataRepository;
+    private final PersonalDataRepository personalDataRepository;
 
-    public PersonalDataService() {
-        this.personalDataRepository = new DiscordRepository<>(PersonalData.class);
+    public PersonalDataService(PersonalDataRepository personalDataRepository) {
+        this.personalDataRepository = personalDataRepository;
     }
+
 
     public PersonalData save(){
         return personalDataRepository.save(new PersonalData(

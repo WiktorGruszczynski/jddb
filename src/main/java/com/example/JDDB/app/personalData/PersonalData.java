@@ -1,6 +1,7 @@
 package com.example.JDDB.app.personalData;
 
-import org.springframework.data.annotation.Id;
+
+import com.example.JDDB.lib.annotations.Id;
 
 import java.util.Date;
 

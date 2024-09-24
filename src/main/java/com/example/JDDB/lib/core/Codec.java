@@ -1,10 +1,10 @@
-package com.example.JDDB.lib.core.codec;
+package com.example.JDDB.lib.core;
 
 import com.example.JDDB.lib.annotations.Column;
+import com.example.JDDB.lib.annotations.Id;
 import com.example.JDDB.lib.utils.AllowedType;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.annotation.Id;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -151,7 +151,6 @@ public class Codec<T> {
         }
     }
 
-
     public String encode(T entity){
         StringBuilder buffer = new StringBuilder();
 
@@ -196,6 +195,7 @@ public class Codec<T> {
 
     public T decode(@NotNull String id, @NotNull String data){
         List<String> tokens = getTokens(data);
+
         T entity = newEntity();
         int iterator = 0;
 

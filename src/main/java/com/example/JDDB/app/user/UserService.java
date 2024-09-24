@@ -10,12 +10,11 @@ import java.util.List;
 
 @Service
 public class UserService {
-    private final DiscordRepository<User> userRepository;
+    private final UserRepository userRepository;
 
-    public UserService() {
-        this.userRepository = new DiscordRepository<>(User.class);
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
-
 
     public User addUser(User user) {
         return userRepository.save(user);
