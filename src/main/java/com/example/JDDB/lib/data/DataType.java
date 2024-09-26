@@ -1,8 +1,8 @@
-package com.example.JDDB.lib.utils;
+package com.example.JDDB.lib.data;
 
 import java.util.Date;
 
-public enum AllowedType {
+public enum DataType {
     BOOLEAN(Boolean.class),
     BYTE(Byte.class),
     SHORT(Short.class),
@@ -16,22 +16,21 @@ public enum AllowedType {
 
     private Class<?> type;
 
-    AllowedType(Class<?> type){
+    DataType(Class<?> type){
         this.type = type;
     }
 
-    public Class<?> getType(){
+    public Class<?> getType() {
         return type;
     }
 
-    public static boolean containsType(Class<?> type){
-        for (AllowedType allowedType: values()){
-            if (allowedType.getType() == type){
+    public boolean contains(Class<?> type){
+        for (DataType dataType: values()){
+            if (dataType.getType() == type){
                 return true;
             }
         }
 
         return false;
     }
-
 }

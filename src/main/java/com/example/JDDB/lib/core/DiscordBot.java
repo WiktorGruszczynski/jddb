@@ -1,30 +1,29 @@
 package com.example.JDDB.lib.core;
 
+
 import com.example.JDDB.lib.utils.PropertyManager;
-import jakarta.annotation.Nonnull;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class DiscordBot {
     private static String token;
     private static Long guildId;
-    private final static String TABLES = "tables";
-    private final static String COUNTERS = "counters";
 
     private static Guild guild;
-    private final static List<Category> categories = new ArrayList<>();
-    private final static List<TextChannel> textChannels = new ArrayList<>();
+    private static List<Category> categories = new ArrayList<>();
+    private static List<TextChannel> textChannels = new ArrayList<>();
+
+    private static final String TABLES = "tables";
+    private static final String COUNTERS = "counters";
+    private static final String GENERATORS = "generators";
 
     static {
         PropertyManager propertyManager = new PropertyManager();
@@ -34,13 +33,13 @@ public class DiscordBot {
 
         try {
             connect();
-        } catch (InterruptedException exception) {
-            throw new RuntimeException(exception);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
 
-    public static void connect() throws InterruptedException {
+    private static void connect() throws InterruptedException {
         JDA jda = JDABuilder
                 .createDefault(token)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
@@ -56,22 +55,15 @@ public class DiscordBot {
             );
         }
 
-
         categories.addAll(guild.getCategories());
         textChannels.addAll(guild.getTextChannels());
 
-
-        if (!isCategory(TABLES)){
-            createCategory(TABLES);
-        }
-
-        if (!isCategory(COUNTERS)){
-            createCategory(COUNTERS);
-        }
+        createCategories();
     }
 
+    private static boolean isCategory(String categoryName){
 
-    public static boolean isCategory(String categoryName){
+
         for (Category category: categories){
             if (category.getName().equals(categoryName)){
                 return true;
@@ -81,72 +73,21 @@ public class DiscordBot {
         return false;
     }
 
-    public static Category getCategory(String categoryName){
-        for (Category category: categories){
-            if (category.getName().equals(categoryName)){
-                return category;
-            }
+    private static void createCategories(){
+        if (!isCategory("tables")){
+            guild.createCategory("tables").queue();
         }
 
-        return null;
-    }
-
-    public static Category createCategory(String categoryName){
-        Category category = guild.createCategory(categoryName).complete();
-
-        categories.add(category);
-
-        return category;
-    }
-
-
-    public static boolean isTextChannel(Category category, String channelName){
-        for (TextChannel textChannel: textChannels){
-            String name = textChannel.getName();
-            Category parentCategory = textChannel.getParentCategory();
-            if (name.equals(channelName) && parentCategory!=null && parentCategory.equals(category)){
-                return true;
-            }
+        if (!isCategory("counters")){
+            guild.createCategory("counters").queue();
         }
 
-        return false;
-    }
-
-    public static TextChannel createTextChannel(Category category, String channelName){
-        TextChannel textChannel = category.createTextChannel(channelName).complete();
-
-        textChannels.add(textChannel);
-
-        return textChannel;
-    }
-
-    public static TextChannel getTextChannel(Category category, String channelName){
-        for (TextChannel textChannel: textChannels){
-            String name = textChannel.getName();
-
-            Category parentCategory = textChannel.getParentCategory();
-
-            if (name.equals(channelName) && parentCategory!=null && parentCategory.equals(category)){
-                return textChannel;
-            }
+        if (!isCategory("generators")){
+            guild.createCategory("generators").queue();
         }
-
-        return null;
     }
 
-    public static Message getMessageById(@Nonnull String id, @Nonnull TextChannel textChannel){
-        return textChannel.retrieveMessageById(id).complete();
-    }
-
-    public static Message sendPlainMessage(String text, TextChannel textChannel){
-        return textChannel.sendMessage(text).complete();
-    }
-
-    public static List<Message> getAllMessages(TextChannel textChannel) {
-        return textChannel.getHistoryFromBeginning(100).complete().getRetrievedHistory();
-    }
-
-    public static void deleteMessageById(TextChannel textChannel, String id){
-        textChannel.deleteMessageById(id).complete();
+    public static Guild getGuild(){
+        return guild;
     }
 }

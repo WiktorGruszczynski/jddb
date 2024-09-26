@@ -1,37 +1,20 @@
 package com.example.JDDB.lib.core.repository;
 
 
-import com.example.JDDB.lib.core.database.Connection;
-import org.springframework.data.annotation.Id;
+import com.example.JDDB.lib.core.Connection;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
-public class RepositoryInitializer<T> {
-    protected Connection<T> connection;
+public class RepositoryInitializer<T, ID> {
+    protected final Connection<T, ID> connection;
 
     public RepositoryInitializer(){
-        this.connection = new Connection<>(
-                (Class<T>) (
-                        ((ParameterizedType) (this.getClass().getGenericSuperclass())).getActualTypeArguments()[0]
-                )
-        );
+        Type[] typeArguments =  ((ParameterizedType) (this.getClass().getGenericSuperclass())).getActualTypeArguments();
+
+        Class<?> persistenceClass = (Class<?>) typeArguments[0];
+        Class<?> idClass = (Class<?>) typeArguments[1];
+
+        this.connection = new Connection<>(persistenceClass, idClass);
     }
-
-
-    private boolean isPrimaryKeyPresent(Class<T> clazz){
-        Field[] fields = clazz.getDeclaredFields();
-
-        for (Field field: fields){
-            if (field.isAnnotationPresent(Id.class)){
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-
-
-
 }

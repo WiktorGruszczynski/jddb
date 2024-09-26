@@ -1,39 +1,36 @@
 package com.example.JDDB.lib.core.repository;
 
-import com.example.JDDB.lib.core.database.Query;
 
-import java.lang.reflect.ParameterizedType;
+
 import java.util.List;
 import java.util.Optional;
 
-public class DiscordRepository<T>
-        extends RepositoryInitializer<T>
-        implements RepositoryMethods<T> {
 
+public class DiscordRepository<T, ID> extends RepositoryInitializer<T, ID> implements RepositoryMethods<T, ID>{
 
     @Override
     public T save(T entity) {
-        return connection.saveEntity(entity);
+        return null;
     }
 
     @Override
     public Iterable<T> saveAll(List<T> entities) {
-        return connection.saveEntities(entities);
+        return null;
     }
 
     @Override
-    public Optional<T> findById(String id) {
-        return connection.findEntityById(id);
+    public Optional<T> findById(ID id) {
+        return Optional.empty();
     }
 
     @Override
-    public boolean existsById(String id) {
-        return connection.existsById(id);
+    public boolean existsById(ID id) {
+        return false;
     }
 
     @Override
-    public List<T> findAll() {
-        return connection.findAllEntities();
+    public Iterable<T> findAll() {
+        return null;
     }
 
     @Override
@@ -42,8 +39,8 @@ public class DiscordRepository<T>
     }
 
     @Override
-    public void deleteById(String id) {
-        connection.deleteById(id);
+    public void deleteById(ID id) {
+
     }
 
     @Override
@@ -57,12 +54,7 @@ public class DiscordRepository<T>
     }
 
     @Override
-    public void deleteAll(Iterable<T> entities) {
+    public void deleteAll(List<T> entities) {
 
-    }
-
-    @Override
-    public Query<?> executeQuery(Query<T> query) {
-        return null;
     }
 }

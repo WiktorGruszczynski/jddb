@@ -1,31 +1,29 @@
 package com.example.JDDB.lib.core.repository;
 
 
-import com.example.JDDB.lib.core.database.Query;
+
 
 import java.util.List;
 import java.util.Optional;
 
-public interface RepositoryMethods<T>{
+public interface RepositoryMethods<T, ID>{
     T save(T entity);
 
     Iterable<T> saveAll(List<T> entities);
 
-    Optional<T> findById(String id);
+    Optional<T> findById(ID id);
 
-    boolean existsById(String id);
+    boolean existsById(ID id);
 
     Iterable<T> findAll();
 
     long count();
 
-    void deleteById(String id);
+    void deleteById(ID id);
 
     void delete(T entity);
 
     void deleteAll();
 
-    void deleteAll(Iterable<T> entities);
-
-    Query<?> executeQuery(Query<T> query);
+    void deleteAll(List<T> entities);
 }

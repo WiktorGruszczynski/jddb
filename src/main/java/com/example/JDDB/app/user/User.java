@@ -12,6 +12,13 @@ public class User {
     private String email;
     private Integer age;
 
+    public User(String name, String email, Integer age) {
+        this.name = name;
+        this.email = email;
+        this.age = age;
+    }
+
+
 
     public String getId() {
         return id;
