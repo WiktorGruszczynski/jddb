@@ -2,7 +2,7 @@ package com.example.JDDB.app.user;
 
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping(path = "/api/user")
@@ -11,6 +11,11 @@ public class UserController {
 
     public UserController(UserService serverService) {
         this.userService = serverService;
+    }
+
+    @GetMapping
+    public User test(){
+        return userService.test();
     }
 
 }

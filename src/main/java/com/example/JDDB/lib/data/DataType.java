@@ -24,7 +24,7 @@ public enum DataType {
         return type;
     }
 
-    public boolean contains(Class<?> type){
+    public static boolean contains(Class<?> type){
         for (DataType dataType: values()){
             if (dataType.getType() == type){
                 return true;

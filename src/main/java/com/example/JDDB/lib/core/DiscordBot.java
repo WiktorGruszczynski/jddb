@@ -5,9 +5,11 @@ import com.example.JDDB.lib.utils.PropertyManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
+
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +25,7 @@ public class DiscordBot {
 
     private static final String TABLES = "tables";
     private static final String COUNTERS = "counters";
-    private static final String GENERATORS = "generators";
+
 
     static {
         PropertyManager propertyManager = new PropertyManager();
@@ -62,8 +64,6 @@ public class DiscordBot {
     }
 
     private static boolean isCategory(String categoryName){
-
-
         for (Category category: categories){
             if (category.getName().equals(categoryName)){
                 return true;
@@ -74,20 +74,38 @@ public class DiscordBot {
     }
 
     private static void createCategories(){
-        if (!isCategory("tables")){
-            guild.createCategory("tables").queue();
+        if (!isCategory(TABLES)){
+            guild.createCategory(TABLES).queue();
         }
 
-        if (!isCategory("counters")){
-            guild.createCategory("counters").queue();
-        }
-
-        if (!isCategory("generators")){
-            guild.createCategory("generators").queue();
+        if (!isCategory(COUNTERS)){
+            guild.createCategory(COUNTERS).queue();
         }
     }
 
     public static Guild getGuild(){
         return guild;
+    }
+
+    public static Category getCategoryByName(String name){
+        for (Category category: categories){
+            if (category.getName().equals(name)){
+                return category;
+            }
+        }
+
+        return null;
+    }
+
+    public static TextChannel getTextChannel(Category category, String name){
+        for (TextChannel textChannel: textChannels){
+            if (textChannel.getParentCategory() != null
+                    && textChannel.getParentCategory().equals(category)
+                    && textChannel.getName().equals(name)){
+                return textChannel;
+            }
+        }
+
+        return null;
     }
 }

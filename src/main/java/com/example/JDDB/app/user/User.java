@@ -1,5 +1,8 @@
 package com.example.JDDB.app.user;
 
+
+import com.example.JDDB.lib.annotations.Column;
+import com.example.JDDB.lib.annotations.GeneratedValue;
 import com.example.JDDB.lib.annotations.Id;
 import com.example.JDDB.lib.annotations.Table;
 
@@ -7,17 +10,20 @@ import com.example.JDDB.lib.annotations.Table;
 @Table(name = "user")
 public class User {
     @Id
+    @GeneratedValue
     private String id;
     private String name;
+
+    @Column(nullale = false)
     private String email;
     private Integer age;
 
-    public User(String name, String email, Integer age) {
+    public User(String id, String name, String email, Integer age) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.age = age;
     }
-
 
 
     public String getId() {

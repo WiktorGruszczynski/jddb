@@ -4,5 +4,5 @@ import com.example.JDDB.lib.core.repository.DiscordRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class PersonalDataRepository extends DiscordRepository<PersonalData, Long> {
+public class PersonalDataRepository extends DiscordRepository<PersonalData> {
 }

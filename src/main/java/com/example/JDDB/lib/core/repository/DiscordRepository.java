@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 
-public class DiscordRepository<T, ID> extends RepositoryInitializer<T, ID> implements RepositoryMethods<T, ID>{
+public class DiscordRepository<T> extends RepositoryInitializer<T> implements RepositoryMethods<T>{
 
     @Override
     public T save(T entity) {
-        return null;
+        return connection.save(entity);
     }
 
     @Override
@@ -19,12 +19,12 @@ public class DiscordRepository<T, ID> extends RepositoryInitializer<T, ID> imple
     }
 
     @Override
-    public Optional<T> findById(ID id) {
-        return Optional.empty();
+    public Optional<T> findById(String id) {
+        return connection.findById(id);
     }
 
     @Override
-    public boolean existsById(ID id) {
+    public boolean existsById(String id) {
         return false;
     }
 
@@ -39,7 +39,7 @@ public class DiscordRepository<T, ID> extends RepositoryInitializer<T, ID> imple
     }
 
     @Override
-    public void deleteById(ID id) {
+    public void deleteById(String id) {
 
     }
 
