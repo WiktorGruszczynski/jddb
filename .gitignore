@@ -33,4 +33,4 @@ build/
 .vscode/
 
 
-/src/main/java/com/example/JDDB/app/*
+/src/main/java/com/example/JDDB/app/
