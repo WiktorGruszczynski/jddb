@@ -24,13 +24,13 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
     }
 
     @Override
-    public boolean existsById(String id) {
-        return connection.existsById(id);
+    public List<T> findAll() {
+        return connection.findAll();
     }
 
     @Override
-    public List<T> findAll() {
-        return connection.findAll();
+    public boolean existsById(String id) {
+        return connection.existsById(id);
     }
 
     @Override
