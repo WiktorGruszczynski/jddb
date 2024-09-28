@@ -20,32 +20,32 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
 
     @Override
     public Optional<T> findById(String id) {
-        return null;
+        return connection.findEntityById(id);
     }
 
     @Override
     public boolean existsById(String id) {
-        return false;
+        return connection.existsById(id);
     }
 
     @Override
-    public Iterable<T> findAll() {
-        return null;
+    public List<T> findAll() {
+        return connection.findAll();
     }
 
     @Override
     public long count() {
-        return 0;
+        return connection.countEntities();
     }
 
     @Override
     public void deleteById(String id) {
-
+        connection.deleteById(id);
     }
 
     @Override
     public void delete(T entity) {
-
+        connection.delete(entity);
     }
 
     @Override
@@ -55,6 +55,6 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
 
     @Override
     public void deleteAll(List<T> entities) {
-
+        connection.deleteAll(entities);
     }
 }

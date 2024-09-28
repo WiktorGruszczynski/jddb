@@ -1,4 +1,4 @@
-package com.example.JDDB.lib.core;
+package com.example.JDDB.lib.utils;
 
 import com.example.JDDB.lib.data.GeneratorType;
 

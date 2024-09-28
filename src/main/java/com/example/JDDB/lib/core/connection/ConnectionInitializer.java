@@ -3,7 +3,7 @@ package com.example.JDDB.lib.core.connection;
 import com.example.JDDB.lib.core.Codec;
 import com.example.JDDB.lib.core.DiscordBot;
 import com.example.JDDB.lib.core.EntityManager;
-import com.example.JDDB.lib.core.Generator;
+import com.example.JDDB.lib.utils.Generator;
 import com.example.JDDB.lib.utils.UrlReader;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;

@@ -5,6 +5,7 @@ import com.example.JDDB.lib.annotations.Id;
 import com.example.JDDB.lib.annotations.Table;
 import com.example.JDDB.lib.data.DataType;
 import com.example.JDDB.lib.data.GeneratorType;
+import com.example.JDDB.lib.utils.Generator;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -12,6 +13,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
+import java.util.List;
 
 public class EntityManager<T>{
     private final Class<?> entityType;
@@ -100,16 +102,6 @@ public class EntityManager<T>{
         return DataType.contains(type);
     }
 
-    public void injectId(T entity, Field field, String id) throws IllegalAccessException {
-        Class<?> type = field.getType();
-
-        if (type == String.class){
-            field.set(entity, id);
-        }
-        else {
-            throw new RuntimeException("Id type must be type of String");
-        }
-    }
 
     public void injectId(T entity, String id){
         for (Field field: entityType.getDeclaredFields()){
@@ -122,6 +114,12 @@ public class EntityManager<T>{
                     throw new RuntimeException(e);
                 }
             }
+        }
+    }
+
+    public void injectIds(List<T> entities, Generator generator){
+        for (T entity: entities){
+            injectId(entity, generator.generateHex());
         }
     }
 

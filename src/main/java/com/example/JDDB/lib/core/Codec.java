@@ -128,6 +128,8 @@ public class Codec<T> {
         return buffer.toString();
     }
 
+
+
     public T decode(@NotNull String messageId, @NotNull String data){
         List<String> tokens = getTokens(data);
 

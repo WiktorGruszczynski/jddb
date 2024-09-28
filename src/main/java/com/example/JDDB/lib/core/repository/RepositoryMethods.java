@@ -15,7 +15,7 @@ public interface RepositoryMethods<T>{
 
     boolean existsById(String id);
 
-    Iterable<T> findAll();
+    List<T> findAll();
 
     long count();
 

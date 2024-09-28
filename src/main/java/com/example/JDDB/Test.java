@@ -1,5 +1,6 @@
 package com.example.JDDB;
 
+
 import com.example.JDDB.lib.utils.UrlReader;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.utils.FileUpload;

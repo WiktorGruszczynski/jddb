@@ -14,9 +14,19 @@ public class UserController {
         this.userService = serverService;
     }
 
-    @GetMapping
-    public User test(){
+    @GetMapping(path = "/test")
+    public List<User> test(){
         return userService.test();
+    }
+
+    @PostMapping
+    public User addUser(@RequestBody User user){
+        return userService.addUser(user);
+    }
+
+    @GetMapping(path = "/getUser")
+    public User getById(@RequestParam String id){
+        return userService.findById(id);
     }
 
     @GetMapping(path = "/del")
@@ -24,4 +34,13 @@ public class UserController {
         userService.deleteAll();
     }
 
+    @GetMapping(path = "/count")
+    public long count(){
+        return userService.count();
+    }
+
+    @GetMapping(path = "/getAll")
+    public List<User> getAllUsers(){
+        return userService.getAllUsers();
+    }
 }

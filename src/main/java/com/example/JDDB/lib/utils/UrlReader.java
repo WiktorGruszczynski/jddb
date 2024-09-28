@@ -1,5 +1,7 @@
 package com.example.JDDB.lib.utils;
 
+import com.example.JDDB.lib.exceptions.InvalidResponseException;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -43,10 +45,6 @@ public class UrlReader {
     }
 
     public String fetch(String urlAddress){
-        return fetch(urlAddress, 0);
-    }
-
-    private String fetch(String urlAddress, int rounds) {
         HttpRequest httpRequest = HttpRequest
                 .newBuilder()
                 .uri(URI.create(urlAddress))
@@ -65,11 +63,7 @@ public class UrlReader {
         }
 
         if (response.statusCode()==404){
-            if (rounds==0){
-                throw new RuntimeException("Couldnt execute operation");
-            }
-
-            return fetch(urlAddress, rounds-1);
+            throw new RuntimeException();
         }
 
 
