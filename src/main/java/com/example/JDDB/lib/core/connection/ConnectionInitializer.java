@@ -15,7 +15,7 @@ public class ConnectionInitializer<T>{
     protected final Codec<T> codec;
     protected final Guild guild;
     protected final Generator generator;
-    protected final TextChannel tableChannel;
+    protected TextChannel tableChannel;
     protected final TextChannel counterChannel;
     protected final UrlReader urlReader;
 

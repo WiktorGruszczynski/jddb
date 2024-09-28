@@ -171,12 +171,13 @@ public class EntityManager<T>{
         }
     }
 
-    public long getPrimaryKey(T entity) {
+    public String getPrimaryKey(T entity) {
         for (Field field: entityType.getDeclaredFields()){
             if (field.isAnnotationPresent(Id.class)){
                 field.setAccessible(true);
                 try {
-                    return Long.parseLong(String.valueOf(field.get(entity)));
+
+                    return String.valueOf(field.get(entity));
 
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
@@ -185,11 +186,5 @@ public class EntityManager<T>{
         }
 
         throw new RuntimeException("Primary key missing");
-    }
-
-    public String getHexPrimaryKey(T entity){
-        return Long.toHexString(
-                getPrimaryKey(entity)
-        );
     }
 }

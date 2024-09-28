@@ -14,13 +14,13 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
     }
 
     @Override
-    public Iterable<T> saveAll(List<T> entities) {
-        return null;
+    public List<T> saveAll(List<T> entities) {
+        return connection.saveAll(entities);
     }
 
     @Override
     public Optional<T> findById(String id) {
-        return connection.findById(id);
+        return null;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
 
     @Override
     public void deleteAll() {
-
+        connection.deleteAll();
     }
 
     @Override

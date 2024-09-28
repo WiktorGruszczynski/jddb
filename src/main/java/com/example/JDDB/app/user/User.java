@@ -18,8 +18,7 @@ public class User {
     private String email;
     private Integer age;
 
-    public User(String id, String name, String email, Integer age) {
-        this.id = id;
+    public User(String name, String email, Integer age) {
         this.name = name;
         this.email = email;
         this.age = age;

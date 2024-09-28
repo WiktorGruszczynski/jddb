@@ -2,6 +2,7 @@ package com.example.JDDB.app.user;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 
 @RestController
@@ -16,6 +17,11 @@ public class UserController {
     @GetMapping
     public User test(){
         return userService.test();
+    }
+
+    @GetMapping(path = "/del")
+    public void deleteAll(){
+        userService.deleteAll();
     }
 
 }
