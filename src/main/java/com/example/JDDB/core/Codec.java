@@ -6,7 +6,6 @@ import com.example.JDDB.data.annotations.Id;
 
 import org.jetbrains.annotations.NotNull;
 
-
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -14,15 +13,17 @@ public class Codec<T> {
     private final Class<?> type;
     private final EntityManager<T> entityManager;
     private final char SEPARATOR = '$';
+    private final int fieldsCount;
 
-    public Codec(Class<?> type, EntityManager<T> entityManager) {
-        this.type = type;
-        this.entityManager = entityManager;
-    }
 
     public Codec(Class<?> type){
         this.type = type;
         this.entityManager = new EntityManager<>(type);
+        this.fieldsCount = getFieldsCount();
+    }
+
+    private int getFieldsCount(){
+        return type.getDeclaredFields().length;
     }
 
 
@@ -45,7 +46,8 @@ public class Codec<T> {
         }
     }
 
-    private List<String> getTokens(@NotNull String content) {
+
+    public List<String> getTokens(@NotNull String content) {
         List<String> tokens = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
 
@@ -61,12 +63,12 @@ public class Codec<T> {
                 if (bufferSize == 0) {
                     readMode = false;
                     tokens.add(buffer.toString());
-                    buffer = new StringBuilder();
+                    buffer.setLength(0);
                 }
             }
             else {
                 if (chr == '$'){
-                    if (bufferSize==0){
+                    if (bufferSize == 0){
                         tokens.add("");
                     }
                     else {
@@ -123,6 +125,8 @@ public class Codec<T> {
                 throw new RuntimeException(e);
             }
         }
+
+        buffer.append("\n");
 
         return buffer.toString();
     }

@@ -8,9 +8,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -18,15 +16,14 @@ import java.util.concurrent.TimeUnit;
 public class Connection<T> extends ConnectionInitializer<T>{
     private final Integer MAX_CHUNK_SIZE = 8192;
     private Message latestChunk;
-    private long counterValue;
-    private List<Message> allMessages;
+
 
     public Connection(Class<?> entityType) {
         super(entityType);
 
         latestChunk = getLatestChunk(tableChannel);
-        counterValue = getCounterValue();
-        allMessages = getAllMessages();
+
+        loadCacheWithTimeMeasure();
     }
 
     private List<Message> getAllMessages(){
@@ -37,69 +34,46 @@ public class Connection<T> extends ConnectionInitializer<T>{
         }
     }
 
-    private void updateAllMessages(){
-        new Thread(() -> {
-            allMessages = getAllMessages();
-        }).start();
-    }
+    public void loadCache(){
+        List<Chunk> chunks = new ArrayList<>();
+        List<Thread> threads = new ArrayList<>();
 
-    // Counting methods
-    private void updateCounter(int difference){
-        Message message = getLatestChunk(counterChannel);
+        for (Message message: getAllMessages()){
+            String url = message.getAttachments().get(0).getUrl();
 
-        if (message==null){
-            counterChannel.sendMessage(String.valueOf(difference)).queue();
-        }
-        else {
-            String content = message.getContentRaw();
-            long currentValue = Long.parseLong(content);
+            Thread thread = new Thread(() -> {
+                String result = urlReader.fetch(url);
+                chunks.add(
+                        new Chunk(message.getId(), result.trim())
+                );
+            });
 
-            currentValue+=difference;
-
-            message.editMessage(Long.toString(currentValue)).queue();
+            thread.start();
+            threads.add(thread);
         }
 
-        counterValue = counterValue + difference;
-    }
+        awaitThreadPool(threads);
 
-    private void resetCounter(){
-        Message message = getLatestChunk(counterChannel);
 
-        if (message == null){
-            counterChannel.sendMessage("0").queue();
-        }
-        else {
-            message.editMessage("0").queue();
-        }
-
-        counterValue = 0;
-    }
-
-    private long getCounterValue(){
-        Message message = getLatestChunk(counterChannel);
-
-        if (message == null){
-            return 0;
-        }
-        else {
-            return Long.parseLong(message.getContentRaw());
+        for (Chunk chunk: chunks){
+            for (String row: chunk.getRows()){
+                T entity = codec.decode(chunk.getMessageId(), row);
+                cache.add(entity);
+            }
         }
     }
 
-    private void incrementCounter(int difference){
-        updateCounter(difference);
-    }
-
-    private void decrementCounter(int difference){
-        updateCounter(-difference);
+    public void loadCacheWithTimeMeasure(){
+        long t0 = new Date().getTime();
+        loadCache();
+        long t1 = new Date().getTime();
+        System.out.println(entityType.getName() + " - loaded cache in " + (t1-t0) + " ms");
     }
 
 
     // Saving data private methods
     private void updateLatestChunk(){
-        new Thread(() -> {
-            latestChunk = getLatestChunk(tableChannel);
-        }).start();
+        new Thread(() -> latestChunk = getLatestChunk(tableChannel)).start();
     }
 
     private Message getLatestChunk(TextChannel textChannel){
@@ -126,11 +100,9 @@ public class Connection<T> extends ConnectionInitializer<T>{
         String data = urlReader.fetch(attachment.getUrl());
 
 
-        FileUpload fileUpload = createChunk(data + "\n" + inputData);
+        FileUpload fileUpload = createChunk(data + inputData);
 
-        message.editMessageAttachments(fileUpload).queue(p -> {
-            updateLatestChunk();
-        });
+        message.editMessageAttachments(fileUpload).queue(p -> updateLatestChunk());
     }
 
     private T saveNewChunk(T entity, String encodedEntity){
@@ -218,13 +190,8 @@ public class Connection<T> extends ConnectionInitializer<T>{
 
             buffer.append(codec.encode(entity));
 
-            if (i<entities.size()-1){
-                buffer.append("\n");
-            }
 
             if (buffer.toString().length() > MAX_CHUNK_SIZE){
-                buffer.append("\n");
-
                 savedEntities.addAll(
                         saveNewChunk(entities.subList(start, i), buffer.toString())
                 );
@@ -266,7 +233,7 @@ public class Connection<T> extends ConnectionInitializer<T>{
 
     private List<T> editChunks(List<T> entities, Message message){
         String chunkContent = urlReader.fetch(message.getAttachments().get(0).getUrl());
-        StringBuilder buffer = new StringBuilder(chunkContent+"\n");
+        StringBuilder buffer = new StringBuilder(chunkContent);
         List<T> savedEntities = new ArrayList<>();
 
         int start = 0;
@@ -276,12 +243,10 @@ public class Connection<T> extends ConnectionInitializer<T>{
 
             buffer.append(codec.encode(entity));
 
-            if (i<entities.size()-1){
-                buffer.append("\n");
-            }
+
 
             if (buffer.toString().length() > MAX_CHUNK_SIZE){
-                buffer.append("\n");
+
 
                 if (start == 0){
                     savedEntities.addAll(
@@ -324,53 +289,39 @@ public class Connection<T> extends ConnectionInitializer<T>{
     // public methods
 
     public T save(T entity){
-        incrementCounter(1);
-        updateAllMessages();
-        return save(entity, latestChunk);
+        entity = save(entity, latestChunk);
+
+        cache.add(entity);
+
+        return entity;
     }
 
     public List<T> saveAll(List<T> entities) {
-        incrementCounter(entities.size());
-        updateAllMessages();
-        return saveAll(entities, latestChunk);
+        entities = saveAll(entities, latestChunk);
+
+        cache.addAll(entities);
+
+        return entities;
+    }
+
+    public List<T> findAll() {
+        return cache.getAll();
     }
 
     public Optional<T> findEntityById(String id) {
-        String[] parts = id.split("\\.");
-
-        if (parts.length!=2){
-            return Optional.empty();
-        }
-
-        String msgHexId = parts[0];
-        String msgId =  String.valueOf(Long.parseLong(msgHexId, 16));
-        Message message;
-
         try {
-            message = tableChannel.retrieveMessageById(msgId).complete();
+             T entity = cache.getBy("id", id);
+
+             if (entity==null){
+                 return Optional.empty();
+             }
+             else {
+                 return Optional.of(entity);
+             }
+
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
         }
-        catch (Exception e){
-            return Optional.empty();
-        }
-
-
-        if (message == null){
-            return Optional.empty();
-        }
-
-        String attachmentUrl = message.getAttachments().get(0).getUrl();
-
-        String encodedEntities = urlReader.fetch(attachmentUrl);
-
-        for (String encodedEntity: encodedEntities.split("\n")){
-            T entity = codec.decode(msgId, encodedEntity);
-
-            if (entityManager.getPrimaryKey(entity).equals(id)){
-                return Optional.of(entity);
-            }
-        }
-
-        return Optional.empty();
     }
 
     public boolean existsById(String id){
@@ -384,34 +335,15 @@ public class Connection<T> extends ConnectionInitializer<T>{
         tableChannel.delete().queue(r -> {
             tableChannel = copy;
             latestChunk = null;
-            resetCounter();
-            updateAllMessages();
+            cache.deleteAll();
         });
     }
 
     public long countEntities(){
-        return counterValue;
+        return cache.size();
     }
 
-    public List<T> findAll() {
-        List<Chunk> chunks = new ArrayList<>();
-        List<Thread> threads = new ArrayList<>();
-        List<T> entities = new ArrayList<>();
-
-        for (Message message: allMessages){
-            String url = message.getAttachments().get(0).getUrl();
-
-            Thread thread = new Thread(() -> {
-                String result = urlReader.fetch(url);
-                chunks.add(
-                        new Chunk(message.getId(), result.trim())
-                );
-            });
-
-            thread.start();
-            threads.add(thread);
-        }
-
+    private void awaitThreadPool(Iterable<Thread> threads){
         while (true){
             boolean runningThread = false;
 
@@ -424,21 +356,42 @@ public class Connection<T> extends ConnectionInitializer<T>{
 
             if (!runningThread) break;
         }
-
-        for (Chunk chunk: chunks){
-            for (String row: chunk.getRows()){
-                T entity = codec.decode(chunk.getMessageId(), row);
-                entities.add(entity);
-            }
-        }
-
-        return entities;
     }
 
     public void deleteById(String id) {
+        String msgHexId = id.split("\\.")[0];
+        long msgId = Long.valueOf(msgHexId, 16);
+
+        Message message = tableChannel.retrieveMessageById(msgId).complete();
+        Message.Attachment attachment = message.getAttachments().get(0);
+
+        String data = urlReader.fetch(attachment.getUrl());
+        String[] lines = data.split("\n");
+
+        StringBuilder buffer = new StringBuilder();
+        boolean found = false;
+
+        for (String line : lines) {
+            T entity = codec.decode(String.valueOf(msgId), line);
+            if (!entityManager.getPrimaryKey(entity).equals(id)) {
+                buffer
+                        .append(line)
+                        .append("\n");
+            } else {
+                found = true;
+            }
+        }
+
+        if (!found) return;
+
+        FileUpload file = createChunk(buffer.toString());
+        message.editMessageAttachments(file).queue();
     }
 
     public void delete(T entity) {
+        deleteById(
+                entityManager.getPrimaryKey(entity)
+        );
     }
 
     public void deleteAll(List<T> entities) {

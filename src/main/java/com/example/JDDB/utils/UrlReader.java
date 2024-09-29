@@ -9,6 +9,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 public class UrlReader {
@@ -39,6 +40,10 @@ public class UrlReader {
     }
 
     public String fetch(String urlAddress){
+        return fetch(urlAddress, 3, 50);
+    }
+
+    public String fetch(String urlAddress, int rounds, int retryAfterMs){
         HttpRequest httpRequest = HttpRequest
                 .newBuilder()
                 .uri(URI.create(urlAddress))
@@ -52,7 +57,15 @@ public class UrlReader {
         try {
             response = client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(50);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+            return fetch(urlAddress, rounds-1, 50);
+        }
+        catch (InterruptedException e){
             throw new RuntimeException(e);
         }
 

@@ -1,5 +1,6 @@
 package com.example.JDDB.core.connection;
 
+import com.example.JDDB.core.Cache;
 import com.example.JDDB.core.Codec;
 import com.example.JDDB.core.DiscordBot;
 import com.example.JDDB.core.EntityManager;
@@ -16,8 +17,8 @@ public class ConnectionInitializer<T>{
     protected final Guild guild;
     protected final Generator generator;
     protected TextChannel tableChannel;
-    protected final TextChannel counterChannel;
     protected final UrlReader urlReader;
+    protected final Cache<T> cache;
 
 
     public ConnectionInitializer(Class<?> entityType){
@@ -27,8 +28,8 @@ public class ConnectionInitializer<T>{
         this.guild = DiscordBot.getGuild();
         this.generator = initGenerator();
         this.tableChannel = initTableChannel();
-        this.counterChannel = initCounterChannel();
         this.urlReader = new UrlReader();
+        this.cache = new Cache<>(entityType);
     }
 
     private Generator initGenerator(){
@@ -39,10 +40,6 @@ public class ConnectionInitializer<T>{
 
     private TextChannel initTableChannel(){
         return initTextChannel("tables", entityManager.getTableName());
-    }
-
-    private TextChannel initCounterChannel(){
-        return initTextChannel("counters", entityManager.getTableName());
     }
 
     private TextChannel initTextChannel(String categoryName, String channelName){
