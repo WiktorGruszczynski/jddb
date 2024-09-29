@@ -395,5 +395,6 @@ public class Connection<T> extends ConnectionInitializer<T>{
     }
 
     public void deleteAll(List<T> entities) {
+
     }
 }
