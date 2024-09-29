@@ -50,4 +50,39 @@ public class Cache<T>{
 
         return null;
     }
+
+    public void deleteBy(String keyName, Object value) throws NoSuchFieldException{
+        Field field = persistanceClass.getDeclaredField(keyName);
+        field.setAccessible(true);
+
+        try {
+            for (int i=0; i< elements.size(); i++){
+                T element = elements.get(i);
+
+                if (field.get(element).equals(value)){
+                    elements.remove(i);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteOneBy(String keyName, Object value) throws NoSuchFieldException{
+        Field field = persistanceClass.getDeclaredField(keyName);
+        field.setAccessible(true);
+
+        try {
+            for (int i=0; i< elements.size(); i++){
+                T element = elements.get(i);
+
+                if (field.get(element).equals(value)){
+                    elements.remove(i);
+                    return;
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

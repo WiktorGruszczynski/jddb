@@ -99,8 +99,15 @@ public class Connection<T> extends ConnectionInitializer<T>{
         Message.Attachment attachment = message.getAttachments().get(0);
         String data = urlReader.fetch(attachment.getUrl());
 
-
         FileUpload fileUpload = createChunk(data + inputData);
+
+        message.editMessageAttachments(fileUpload).queue(p -> updateLatestChunk());
+    }
+
+    private void insertChunkData(String data, Message message){
+        Message.Attachment attachment = message.getAttachments().get(0);
+
+        FileUpload fileUpload = createChunk(data );
 
         message.editMessageAttachments(fileUpload).queue(p -> updateLatestChunk());
     }
@@ -358,34 +365,43 @@ public class Connection<T> extends ConnectionInitializer<T>{
         }
     }
 
+
     public void deleteById(String id) {
-        String msgHexId = id.split("\\.")[0];
-        long msgId = Long.valueOf(msgHexId, 16);
+        new Thread(() -> {
+            String msgHexId = id.split("\\.")[0];
+            long msgId = Long.valueOf(msgHexId, 16);
 
-        Message message = tableChannel.retrieveMessageById(msgId).complete();
-        Message.Attachment attachment = message.getAttachments().get(0);
+            Message message = tableChannel.retrieveMessageById(msgId).complete();
+            Message.Attachment attachment = message.getAttachments().get(0);
 
-        String data = urlReader.fetch(attachment.getUrl());
-        String[] lines = data.split("\n");
+            String data = urlReader.fetch(attachment.getUrl());
+            String[] lines = data.split("\n");
 
-        StringBuilder buffer = new StringBuilder();
-        boolean found = false;
+            StringBuilder buffer = new StringBuilder();
+            boolean found = false;
 
-        for (String line : lines) {
-            T entity = codec.decode(String.valueOf(msgId), line);
-            if (!entityManager.getPrimaryKey(entity).equals(id)) {
-                buffer
-                        .append(line)
-                        .append("\n");
-            } else {
-                found = true;
+            for (String line : lines) {
+                T entity = codec.decode(String.valueOf(msgId), line);
+                if (!entityManager.getPrimaryKey(entity).equals(id)) {
+                    buffer
+                            .append(line)
+                            .append("\n");
+                } else {
+                    found = true;
+                }
             }
+
+            if (!found) return;
+
+            insertChunkData(buffer.toString(), message);
+
+        }).start();
+
+        try {
+            cache.deleteOneBy("id", id);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
         }
-
-        if (!found) return;
-
-        FileUpload file = createChunk(buffer.toString());
-        message.editMessageAttachments(file).queue();
     }
 
     public void delete(T entity) {
