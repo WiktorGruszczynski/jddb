@@ -133,7 +133,7 @@ public class Codec<T> {
 
 
 
-    public T decode(@NotNull String messageId, @NotNull String data){
+    public T decode(long messageId, @NotNull String data){
         List<String> tokens = getTokens(data);
 
         T entity = entityManager.newEntity();
@@ -146,7 +146,7 @@ public class Codec<T> {
             try {
                 if (field.isAnnotationPresent(Id.class)){
                     String msgHexId = Long.toHexString(
-                            Long.parseLong(messageId)
+                            messageId
                     );
                         entityManager.injectField(entity, field, msgHexId+ "." +tokens.get(i));
                 }

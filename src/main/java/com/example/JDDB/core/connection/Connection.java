@@ -2,6 +2,8 @@ package com.example.JDDB.core.connection;
 
 
 import com.example.JDDB.core.Chunk;
+import com.example.JDDB.core.MessageEntities;
+import com.example.JDDB.data.exceptions.NoPrimaryKeyException;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -14,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 
 public class Connection<T> extends ConnectionInitializer<T>{
-    private final Integer MAX_CHUNK_SIZE = 8192;
+    private final Integer MAX_CHUNK_SIZE = 1024*64;
     private Message latestChunk;
 
 
@@ -57,7 +59,7 @@ public class Connection<T> extends ConnectionInitializer<T>{
 
         for (Chunk chunk: chunks){
             for (String row: chunk.getRows()){
-                T entity = codec.decode(chunk.getMessageId(), row);
+                T entity = codec.decode(chunk.getMessageIdLong(), row);
                 cache.add(entity);
             }
         }
@@ -105,10 +107,7 @@ public class Connection<T> extends ConnectionInitializer<T>{
     }
 
     private void insertChunkData(String data, Message message){
-        Message.Attachment attachment = message.getAttachments().get(0);
-
         FileUpload fileUpload = createChunk(data );
-
         message.editMessageAttachments(fileUpload).queue(p -> updateLatestChunk());
     }
 
@@ -366,6 +365,58 @@ public class Connection<T> extends ConnectionInitializer<T>{
     }
 
 
+    private void removeEntitiesFromChunk(MessageEntities<T> group){
+        String msgHexId = group.getMessageId();
+        long messageId = Long.parseLong(msgHexId, 16);
+
+
+        tableChannel.retrieveMessageById(messageId).queue(message -> {
+            StringBuilder buffer = new StringBuilder();
+
+            Message.Attachment attachment = message.getAttachments().get(0);
+            String data = urlReader.fetch(attachment.getUrl());
+
+            for (String line: data.split("\n")){
+                T decodedEntity = codec.decode(messageId, line);
+
+                if (!group.has(decodedEntity)){
+                    buffer
+                            .append(line)
+                            .append("\n");
+                }
+            }
+
+            insertChunkData(buffer.toString(), message);
+            updateLatestChunk();
+        });
+    }
+
+    private void removeEntitiesFromChunks(List<T> entities){
+        List<String> registeredMessageIds = new ArrayList<>();
+        List<MessageEntities<T>> groups = new ArrayList<>();
+
+        for (T entity: entities){
+            String id = entityManager.getPrimaryKey(entity);
+            String msgHexId = id.split("\\.")[0];
+
+            if (!registeredMessageIds.contains(msgHexId)){
+                registeredMessageIds.add(msgHexId);
+                groups.add(new MessageEntities<>(msgHexId));
+            }
+
+            for (MessageEntities<T> group: groups){
+                if (group.getMessageId().equals(msgHexId)){
+                    group.add(entity);
+                    break;
+                }
+            }
+        }
+
+        for (MessageEntities<T> group: groups){
+            removeEntitiesFromChunk(group);
+        }
+    }
+
     public void deleteById(String id) {
         new Thread(() -> {
             String msgHexId = id.split("\\.")[0];
@@ -381,7 +432,7 @@ public class Connection<T> extends ConnectionInitializer<T>{
             boolean found = false;
 
             for (String line : lines) {
-                T entity = codec.decode(String.valueOf(msgId), line);
+                T entity = codec.decode(msgId, line);
                 if (!entityManager.getPrimaryKey(entity).equals(id)) {
                     buffer
                             .append(line)
@@ -400,7 +451,9 @@ public class Connection<T> extends ConnectionInitializer<T>{
         try {
             cache.deleteOneBy("id", id);
         } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(
+                    new NoPrimaryKeyException()
+            );
         }
     }
 
@@ -411,6 +464,8 @@ public class Connection<T> extends ConnectionInitializer<T>{
     }
 
     public void deleteAll(List<T> entities) {
-
+        removeEntitiesFromChunks(entities);
+        cache.deleteAll(entities);
     }
+
 }

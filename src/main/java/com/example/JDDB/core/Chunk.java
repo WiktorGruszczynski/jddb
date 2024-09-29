@@ -22,6 +22,10 @@ public class Chunk {
         return messageId;
     }
 
+    public long getMessageIdLong(){
+        return Long.parseLong(messageId);
+    }
+
     public List<String> getRows(){
         return rows;
     }

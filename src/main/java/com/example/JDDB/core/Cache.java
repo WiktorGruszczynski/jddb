@@ -1,6 +1,9 @@
 package com.example.JDDB.core;
 
 
+import com.example.JDDB.data.annotations.Id;
+import com.example.JDDB.data.exceptions.NoPrimaryKeyException;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +12,25 @@ import java.util.List;
 public class Cache<T>{
     private final List<T> elements = new ArrayList<>();
     private final Class<?> persistanceClass;
+    private final EntityManager<T> entityManager;
+    private final Field primaryKeyField;
 
     public Cache(Class<?> persistanceClass){
         this.persistanceClass = persistanceClass;
+        this.entityManager = new EntityManager<>(persistanceClass);
+        this.primaryKeyField = getPrimaryKeyField();
+    }
+
+    private Field getPrimaryKeyField(){
+        for (Field field: persistanceClass.getDeclaredFields()){
+            if (field.isAnnotationPresent(Id.class)){
+                return field;
+            }
+        }
+
+        throw new RuntimeException(
+                new NoPrimaryKeyException()
+        );
     }
 
     public long size(){
@@ -84,5 +103,9 @@ public class Cache<T>{
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void deleteAll(List<T> entities){
+        elements.removeIf(entities::contains);
     }
 }
