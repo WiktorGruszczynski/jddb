@@ -12,7 +12,15 @@ public enum DataType {
     DOUBLE(Double.class),
     CHARACTER(Character.class),
     STRING(String.class),
-    DATE(Date.class);
+    DATE(Date.class),
+    BOOLEAN_PRIMITIVE(boolean.class),
+    BYTE_PRIMITIVE(byte.class),
+    SHORT_PRIMITIVE(short.class),
+    INTEGER_PRIMITIVE(int.class),
+    LONG_PRIMITIVE(long.class),
+    FLOAT_PRIMITIVE(float.class),
+    DOUBLE_PRIMITIVE(double.class),
+    CHARACTER_PRIMITIVE(char.class);
 
     private Class<?> type;
 

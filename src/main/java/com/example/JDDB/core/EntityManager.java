@@ -174,7 +174,6 @@ public class EntityManager<T>{
             if (field.isAnnotationPresent(Id.class)){
                 field.setAccessible(true);
                 try {
-
                     return String.valueOf(field.get(entity));
 
                 } catch (IllegalAccessException e) {

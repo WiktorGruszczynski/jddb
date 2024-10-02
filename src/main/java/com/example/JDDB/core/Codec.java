@@ -136,6 +136,8 @@ public class Codec<T> {
     public T decode(long messageId, @NotNull String data){
         List<String> tokens = getTokens(data);
 
+        System.out.println(messageId);
+
         T entity = entityManager.newEntity();
         Field[] fields = type.getDeclaredFields();
 
