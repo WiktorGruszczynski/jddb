@@ -1,4 +1,4 @@
-package com.example.JDDB.core;
+package com.example.JDDB.core.connection.components;
 
 import java.util.ArrayList;
 import java.util.Arrays;

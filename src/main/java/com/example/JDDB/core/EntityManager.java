@@ -86,12 +86,37 @@ public class EntityManager<T>{
         return generatorType;
     }
 
+    private Object[] generateConstructorParams(Constructor<?> constructor){
+        int paramsCount = constructor.getParameterCount();
+        Object[] params = new Object[paramsCount];
+        Class<?>[] types = constructor.getParameterTypes();
+
+        for (int i=0; i<paramsCount; i++){
+            Class<?> type = types[i];
+
+            if (type.isPrimitive()){
+                if (type==boolean.class){
+                    params[i] = false;
+                }
+                else {
+                    params[i] = 0;
+                }
+            }
+            else {
+                params[i] = null;
+            }
+        }
+
+        return params;
+    }
+
     public T newEntity(){
         Constructor<?> constructor = entityType.getConstructors()[0];
-        int paramsCount = constructor.getParameterCount();
 
         try {
-            return (T) constructor.newInstance(new Object[paramsCount]);
+            return (T) constructor.newInstance(
+                    generateConstructorParams(constructor)
+            );
         }
         catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -183,5 +208,30 @@ public class EntityManager<T>{
         }
 
         throw new RuntimeException("Primary key missing");
+    }
+
+    public <R> R getValueByColumnName(T entity, String columnName) {
+        for (Field field: entityType.getDeclaredFields()){
+            field.setAccessible(true);
+
+            try {
+                if (
+                        (
+                            field.isAnnotationPresent(Table.class) &&
+                            field.getAnnotation(Table.class).name().equals(columnName)
+                        ) ||
+                            field.getName().equals(columnName)
+                ){
+                    return (R) field.get(entity);
+                }
+
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        throw new RuntimeException(
+                new NoSuchFieldException()
+        );
     }
 }

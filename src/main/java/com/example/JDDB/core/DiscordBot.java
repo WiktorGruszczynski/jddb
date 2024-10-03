@@ -24,7 +24,6 @@ public class DiscordBot {
     private static List<TextChannel> textChannels = new ArrayList<>();
 
     private static final String TABLES = "tables";
-    private static final String COUNTERS = "counters";
 
 
     static {
@@ -76,10 +75,6 @@ public class DiscordBot {
     private static void createCategories(){
         if (!isCategory(TABLES)){
             guild.createCategory(TABLES).queue();
-        }
-
-        if (!isCategory(COUNTERS)){
-            guild.createCategory(COUNTERS).queue();
         }
     }
 

@@ -2,6 +2,7 @@
 
 
 
+
 ## Discord Repository
 
 | Method       | Description                                                                                       |
@@ -15,3 +16,5 @@
 | `deleteById` | removes entity with specified ID                                                                  |
 | `delete `    | removes passed entity from table                                                                  |
 | `deleteAll`  | function that removes passed array of entities, if no arguments are passed it clears entire table |
+
+
