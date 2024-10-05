@@ -4,6 +4,8 @@ import com.example.JDDB.core.Cache;
 import com.example.JDDB.core.Codec;
 import com.example.JDDB.core.DiscordBot;
 import com.example.JDDB.core.EntityManager;
+import com.example.JDDB.core.query.Parser;
+import com.example.JDDB.core.query.Tokenizer;
 import com.example.JDDB.utils.Generator;
 import com.example.JDDB.utils.UrlReader;
 import net.dv8tion.jda.api.entities.Guild;
@@ -20,6 +22,7 @@ public class ConnectionInitializer<T>{
     protected TextChannel tableChannel;
     protected final UrlReader urlReader;
     protected final Cache<T> cache;
+    protected final Parser queryParser;
 
 
     public ConnectionInitializer(Class<?> entityType){
@@ -31,6 +34,7 @@ public class ConnectionInitializer<T>{
         this.tableChannel = initTableChannel();
         this.urlReader = new UrlReader();
         this.cache = new Cache<>(entityType);
+        this.queryParser = new Parser();
     }
 
     private Generator initGenerator(){

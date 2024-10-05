@@ -3,7 +3,6 @@ package com.example.JDDB.core.repository;
 
 
 
-import com.example.JDDB.core.query.Query;
 
 
 import java.util.List;
@@ -29,6 +28,4 @@ public interface RepositoryMethods<T>{
     void deleteAll();
 
     void deleteAll(List<T> entities);
-
-    <R> R executeQuery(Query<T, R> query);
 }

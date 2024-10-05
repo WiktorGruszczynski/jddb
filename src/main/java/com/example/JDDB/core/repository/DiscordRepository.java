@@ -2,7 +2,7 @@ package com.example.JDDB.core.repository;
 
 
 
-import com.example.JDDB.core.query.Query;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -11,9 +11,7 @@ import java.util.Optional;
 public class DiscordRepository<T> extends RepositoryInitializer<T> implements RepositoryMethods<T>{
 
     @Override
-    public T save(T entity) {
-        return connection.save(entity);
-    }
+    public T save(T entity) {;return connection.save(entity);}
 
     @Override
     public List<T> saveAll(List<T> entities) {
@@ -26,9 +24,7 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
     }
 
     @Override
-    public List<T> findAll() {
-        return connection.findAll();
-    }
+    public List<T> findAll() {return connection.findAll();}
 
     @Override
     public boolean existsById(String id) {
@@ -60,9 +56,8 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
         connection.deleteAll(entities);
     }
 
-    @Override
-    public <R> R executeQuery(Query<T, R> query) {
-        return connection.executeQuery(query);
-    }
 
+    protected  <R> R executeQuery(String nativeQuery){
+        return connection.executeQuery(nativeQuery);
+    }
 }

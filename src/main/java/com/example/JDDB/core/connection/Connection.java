@@ -3,7 +3,7 @@ package com.example.JDDB.core.connection;
 
 import com.example.JDDB.core.connection.components.Chunk;
 import com.example.JDDB.core.connection.components.MessageEntities;
-import com.example.JDDB.core.query.Query;
+import com.example.JDDB.core.query.Tokenizer;
 import com.example.JDDB.data.enums.query.DML;
 import com.example.JDDB.data.exceptions.NoPrimaryKeyException;
 import net.dv8tion.jda.api.entities.Message;
@@ -470,35 +470,14 @@ public class Connection<T> extends ConnectionInitializer<T>{
         cache.deleteAll(entities);
     }
 
-    public <R> R executeQuery(Query<T, R> query) {
-        String[] columns = query.getColumns();
-        List<Object> results = new ArrayList<>();
-
-        if (query.getDml() == DML.SELECT){
-            if (query.getColumns() == null || columns.length==0){
-                return null;
-            }
-
-            if (columns.length==1){
-                if (columns[0].equals("*")){
-                    return (R) cache.getAll();
-                }
-                else {
-                    for (T entity: cache.getAll()){
-                        results.add(
-                                entityManager.<R>getValueByColumnName(entity, columns[0])
-                        );
-                    }
-                }
-            }
-        }
+    public <R> R executeQuery(String value) {
+        List<Object> resultList = new ArrayList<>();
+        Tokenizer tokenizer = queryParser.getTokenizer(value);
+        DML dml = tokenizer.getDML();
 
 
-        if (results.isEmpty()){
-            return null;
-        }
-        else {
-            return (R) results;
-        }
+
+
+        return (R) resultList;
     }
 }
