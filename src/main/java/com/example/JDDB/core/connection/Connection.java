@@ -477,7 +477,6 @@ public class Connection<T> extends ConnectionInitializer<T>{
 
 
 
-
         return (R) resultList;
     }
 }
