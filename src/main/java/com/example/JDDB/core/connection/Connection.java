@@ -1,9 +1,13 @@
 package com.example.JDDB.core.connection;
 
 
+
 import com.example.JDDB.core.connection.components.Chunk;
 import com.example.JDDB.core.connection.components.MessageEntities;
-import com.example.JDDB.core.query.Tokenizer;
+import com.example.JDDB.core.query.Filter;
+import com.example.JDDB.core.query.Parser;
+import com.example.JDDB.core.query.Query;
+import com.example.JDDB.core.query.QueryManager;
 import com.example.JDDB.data.enums.query.DML;
 import com.example.JDDB.data.exceptions.NoPrimaryKeyException;
 import net.dv8tion.jda.api.entities.Message;
@@ -11,6 +15,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +34,7 @@ public class Connection<T> extends ConnectionInitializer<T>{
 
         loadCacheWithTimeMeasure();
     }
+
 
     private List<Message> getAllMessages(){
         try {
@@ -470,13 +476,40 @@ public class Connection<T> extends ConnectionInitializer<T>{
         cache.deleteAll(entities);
     }
 
-    public <R> R executeQuery(String value) {
-        List<Object> resultList = new ArrayList<>();
-        Tokenizer tokenizer = queryParser.getTokenizer(value);
-        DML dml = tokenizer.getDML();
+    private QueryManager<T> getQueryManager(Query<T, ?> query){
+        try {
+            Field field = query.getClass().getDeclaredField("queryManager");
+            field.setAccessible(true);
 
+            return (QueryManager<T>) field.get(query);
 
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        return (R) resultList;
+    public <R> List<R> executeQuery(Query<T, R> query) {
+        List<R> resultList = new ArrayList<>();
+
+        QueryManager<T> queryManager = getQueryManager(query);
+        String column = queryManager.getAffectedArea();
+        Filter<T> filter = queryManager.getFilter();
+
+        filter.setEntityManager(entityManager);
+
+        for (T entity: cache.getAll()){
+            if (filter.matches(entity)){
+                if (column.equals("*")){
+                    resultList.add((R) entity);
+                }
+                else {
+                    resultList.add(
+                            entityManager.getValueByColumnName(entity, column)
+                    );
+                }
+            }
+        }
+
+        return resultList;
     }
 }

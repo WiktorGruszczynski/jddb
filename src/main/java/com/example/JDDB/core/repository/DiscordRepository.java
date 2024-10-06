@@ -3,6 +3,7 @@ package com.example.JDDB.core.repository;
 
 
 
+import com.example.JDDB.core.query.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,8 +57,7 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
         connection.deleteAll(entities);
     }
 
-
-    protected  <R> R executeQuery(String nativeQuery){
-        return connection.executeQuery(nativeQuery);
+    protected <R> List<R> executeQuery(Query<T, R> query){
+        return connection.executeQuery(query);
     }
 }

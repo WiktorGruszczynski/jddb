@@ -1,5 +1,6 @@
 package com.example.JDDB.core;
 
+import com.example.JDDB.data.annotations.Column;
 import com.example.JDDB.data.annotations.GeneratedValue;
 import com.example.JDDB.data.annotations.Id;
 import com.example.JDDB.data.annotations.Table;
@@ -217,8 +218,8 @@ public class EntityManager<T>{
             try {
                 if (
                         (
-                            field.isAnnotationPresent(Table.class) &&
-                            field.getAnnotation(Table.class).name().equals(columnName)
+                            field.isAnnotationPresent(Column.class) &&
+                            field.getAnnotation(Column.class).name().equals(columnName)
                         ) ||
                             field.getName().equals(columnName)
                 ){

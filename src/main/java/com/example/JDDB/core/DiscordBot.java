@@ -39,6 +39,10 @@ public class DiscordBot {
         }
     }
 
+    public static String getToken(){
+        return token;
+    }
+
 
     private static void connect() throws InterruptedException {
         JDA jda = JDABuilder
