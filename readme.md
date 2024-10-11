@@ -20,7 +20,7 @@
 
 ## Custom Queries
 
-```
+```java
     public List<User> getByName(){
         return executeQuery(
                 new Query<User, User>()
