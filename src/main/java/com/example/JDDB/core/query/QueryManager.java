@@ -8,6 +8,7 @@ import com.example.JDDB.data.exceptions.InvalidQueryException;
 public class QueryManager<T> {
     private DML dml;
     private Filter<T> filter;
+    private Sorter sorter;
     private String affectedArea;
 
     public QueryManager(){
@@ -36,11 +37,19 @@ public class QueryManager<T> {
         return affectedArea;
     }
 
+    public Sorter getSorter() {
+        return sorter;
+    }
+
     public void setAffectedArea(String affectedArea) {
         this.affectedArea = affectedArea;
     }
 
     public void updateFilter(String statement) {
         this.filter.update(statement);
+    }
+
+    public void setSorter(Sorter sorter) {
+        this.sorter = sorter;
     }
 }

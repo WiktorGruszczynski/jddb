@@ -1,6 +1,7 @@
 package com.example.JDDB.core.query;
 
 import com.example.JDDB.data.enums.query.DML;
+import com.example.JDDB.data.enums.query.SortDirection;
 
 public class Query<T, R>{
     private QueryManager<T> queryManager;
@@ -37,7 +38,11 @@ public class Query<T, R>{
         return this;
     }
 
-    public Query<T, R> ORDER_BY(){
+    public Query<T, R> ORDER_BY(String columnName, SortDirection sortDirection){
+        queryManager.setSorter(
+                new Sorter(columnName, sortDirection)
+        );
+
         return this;
     }
 

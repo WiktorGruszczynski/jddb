@@ -6,6 +6,8 @@ import com.example.JDDB.core.connection.components.MessageEntities;
 import com.example.JDDB.core.query.Filter;
 import com.example.JDDB.core.query.Query;
 import com.example.JDDB.core.query.QueryManager;
+import com.example.JDDB.core.query.Sorter;
+import com.example.JDDB.data.enums.query.DML;
 import com.example.JDDB.data.exceptions.NoPrimaryKeyException;
 
 import net.dv8tion.jda.api.entities.Message;
@@ -490,8 +492,11 @@ public class Connection<T> extends ConnectionInitializer<T>{
         List<R> resultList = new ArrayList<>();
 
         QueryManager<T> queryManager = getQueryManager(query);
+
+        DML dml = queryManager.getDml();
         String column = queryManager.getAffectedArea();
         Filter<T> filter = queryManager.getFilter();
+        Sorter sorter = queryManager.getSorter();
 
         filter.setEntityManager(entityManager);
 
@@ -506,6 +511,10 @@ public class Connection<T> extends ConnectionInitializer<T>{
                     );
                 }
             }
+        }
+
+        if (dml.equals(DML.DELETE)){
+
         }
 
         return resultList;

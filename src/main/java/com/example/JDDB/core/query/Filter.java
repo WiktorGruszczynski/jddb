@@ -5,7 +5,6 @@ import com.example.JDDB.data.exceptions.InvalidQueryException;
 
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -20,7 +19,6 @@ public class Filter<T> {
     public void setEntityManager(EntityManager<T> entityManager){
         this.entityManager = entityManager;
     }
-
 
     private boolean matchesString(String value, String conditionValue, String comparator){
         switch (comparator){
@@ -56,7 +54,7 @@ public class Filter<T> {
         );
     }
 
-    public boolean matchesBoolean(boolean value, String conditionValue, String comparator){
+    private boolean matchesBoolean(boolean value, String conditionValue, String comparator){
         boolean boolConditionValue;
 
         if (conditionValue.equals("true") || conditionValue.equals("1")){
@@ -84,76 +82,26 @@ public class Filter<T> {
         }
     }
 
-    public boolean matchesInteger(long value, long conditionValue, String comparator){
+    private boolean matchesNumber(Number value, Number conditionValue, String comparator){
+        double val = value.doubleValue();
+        double conditionVal = conditionValue.doubleValue();
+
         return switch (comparator) {
-            case "=" -> value == conditionValue;
-            case "!=" -> value != conditionValue;
-            case ">=" -> value >= conditionValue;
-            case "<=" -> value <= conditionValue;
-            case ">" -> value > conditionValue;
-            case "<" -> value < conditionValue;
+            case "=" -> val == conditionVal;
+            case "!=" -> val != conditionVal;
+            case ">=" -> val >= conditionVal;
+            case "<=" -> val <= conditionVal;
+            case ">" -> val > conditionVal;
+            case "<" -> val < conditionVal;
             default -> throw new RuntimeException(
                     new InvalidQueryException("unknown comparator")
             );
         };
     }
 
-    public boolean matchesDouble(double value, double conditionValue, String comparator){
-        switch (comparator){
-            case "=" -> {
-                return value==conditionValue;
-            }
-            case "!=" -> {
-                return value!=conditionValue;
-            }
-            case ">=" -> {
-                return value>=conditionValue;
-            }
-            case "<=" -> {
-                return value<=conditionValue;
-            }
-            case ">" -> {
-                return value>conditionValue;
-            }
-            case "<" -> {
-                return value<conditionValue;
-            }
-            default -> throw new RuntimeException(
-                new InvalidQueryException("unknown comparator")
-            );
-        }
-    }
-
-
-    public boolean matchesFloat(float value, float conditionValue, String comparator){
-        switch (comparator){
-            case "=" -> {
-                return value==conditionValue;
-            }
-            case "!=" -> {
-                return value!=conditionValue;
-            }
-            case ">=" -> {
-                return value>=conditionValue;
-            }
-            case "<=" -> {
-                return value<=conditionValue;
-            }
-            case ">" -> {
-                return value>conditionValue;
-            }
-            case "<" -> {
-                return value<conditionValue;
-            }
-            default -> throw new RuntimeException(
-                    new InvalidQueryException("unknown comparator")
-            );
-        }
-    }
-
-    public boolean matchesDate(Date date, Date conditionValue, String comparator){
+    private boolean matchesDate(Date date, String conditionValue, String comparator){
         long timestamp = date.getTime();
-        long conditionTimestamp = conditionValue.getTime();
+        long conditionTimestamp = Long.parseLong(conditionValue);
 
         switch (comparator){
             case "=" -> {
@@ -196,22 +144,10 @@ public class Filter<T> {
                 results[i] = matchesBoolean(boolValue, conditionValue, comparator);
             }
             else if (foundValue instanceof Number numValue){
-                if (
-                        (numValue instanceof Byte) ||
-                        (numValue instanceof Short) ||
-                        (numValue instanceof Integer) ||
-                        (numValue instanceof Long)){
-                    results[i] = matchesInteger(Long.parseLong(numValue.toString()), Long.parseLong(conditionValue), comparator);
-                }
-                else if (numValue instanceof Double dValue){
-                    results[i] = matchesDouble(dValue, Double.parseDouble(conditionValue), comparator);
-                }
-                else if (numValue instanceof Float floatValue){
-                    results[i] = matchesFloat(floatValue, Float.parseFloat(conditionValue), comparator);
-                }
+                results[i] = matchesNumber(numValue, Long.parseLong(conditionValue), comparator);
             }
             else if (foundValue instanceof Date date){
-                results[i] = matchesDate(date, date, comparator);
+                results[i] = matchesDate(date, conditionValue, comparator);
             }
             else{
                 throw new RuntimeException(

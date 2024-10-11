@@ -211,7 +211,7 @@ public class EntityManager<T>{
         throw new RuntimeException("Primary key missing");
     }
 
-    public <R> R getValueByColumnName(T entity, String columnName) {
+    public <R> R getValueByColumnName(Object entity, String columnName) {
         for (Field field: entityType.getDeclaredFields()){
             field.setAccessible(true);
 
