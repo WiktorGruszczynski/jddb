@@ -18,3 +18,8 @@
 | `deleteAll`  | function that removes passed array of entities, if no arguments are passed it clears entire table |
 
 
+## Custom Queries
+
+```
+sadasd
+```
