@@ -21,5 +21,13 @@
 ## Custom Queries
 
 ```
-sadasd
+    public List<User> getByName(){
+        return executeQuery(
+                new Query<User, User>()
+                        .SELECT("*")
+                        .WHERE("name=Adam")
+                        .AND()
+                        .WHERE("age>30")
+        );
+    }
 ```
