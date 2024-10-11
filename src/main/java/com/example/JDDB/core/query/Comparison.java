@@ -37,11 +37,15 @@ public class Comparison {
         value = arguments[1].trim();
     }
 
-    public String getValue() {
+    public String getConditionValue() {
         return value;
     }
 
     public String getColumn() {
         return column;
+    }
+
+    public String getComparator(){
+        return comparator;
     }
 }

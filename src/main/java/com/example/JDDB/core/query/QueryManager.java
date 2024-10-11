@@ -4,6 +4,7 @@ package com.example.JDDB.core.query;
 import com.example.JDDB.data.enums.query.DML;
 import com.example.JDDB.data.exceptions.InvalidQueryException;
 
+
 public class QueryManager<T> {
     private DML dml;
     private Filter<T> filter;
@@ -12,8 +13,6 @@ public class QueryManager<T> {
     public QueryManager(){
         this.filter = new Filter<>();
     }
-
-
 
     public DML getDml() {
         return dml;

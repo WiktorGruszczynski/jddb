@@ -1,15 +1,13 @@
 package com.example.JDDB.core.connection;
 
 
-
 import com.example.JDDB.core.connection.components.Chunk;
 import com.example.JDDB.core.connection.components.MessageEntities;
 import com.example.JDDB.core.query.Filter;
-import com.example.JDDB.core.query.Parser;
 import com.example.JDDB.core.query.Query;
 import com.example.JDDB.core.query.QueryManager;
-import com.example.JDDB.data.enums.query.DML;
 import com.example.JDDB.data.exceptions.NoPrimaryKeyException;
+
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.utils.FileUpload;
