@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.utils.FileUpload;
 
+
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -62,7 +63,7 @@ public class Connection<T> extends ConnectionInitializer<T>{
             threads.add(thread);
         }
 
-        awaitThreadPool(threads);
+        threadManager.awaitThreadPool(threads);
 
 
         for (Chunk chunk: chunks){
@@ -81,9 +82,17 @@ public class Connection<T> extends ConnectionInitializer<T>{
     }
 
 
-    // Saving data private methods
+    // Modifying methods
+
     private void updateLatestChunk(){
-        new Thread(() -> latestChunk = getLatestChunk(tableChannel)).start();
+        tableChannel.getHistory().retrievePast(1).queue(p -> {
+            if (!p.isEmpty()){
+                latestChunk = p.get(0);
+            }
+            else {
+                latestChunk = null;
+            }
+        });
     }
 
     private Message getLatestChunk(TextChannel textChannel){
@@ -114,8 +123,13 @@ public class Connection<T> extends ConnectionInitializer<T>{
         message.editMessageAttachments(fileUpload).queue(p -> updateLatestChunk());
     }
 
+    private void insertChunkDataWithoutUpdate(String data, Message message){
+        FileUpload fileUpload = createChunk(data);
+        message.editMessageAttachments(fileUpload).queue();
+    }
+
     private void insertChunkData(String data, Message message){
-        FileUpload fileUpload = createChunk(data );
+        FileUpload fileUpload = createChunk(data);
         message.editMessageAttachments(fileUpload).queue(p -> updateLatestChunk());
     }
 
@@ -151,30 +165,6 @@ public class Connection<T> extends ConnectionInitializer<T>{
         }
 
         return entity;
-    }
-
-    private T save(T entity, Message message){
-        // generate unique hex value
-        String hexId = generator.generateHex();
-
-        //  set id
-        entityManager.injectId(entity, hexId);
-
-        String encodedEntity = codec.encode(entity);
-
-        if (message==null){
-            return saveNewChunk(entity, encodedEntity);
-        }
-        else {
-            int contentSizeAfterUpload = message.getAttachments().get(0).getSize() + encodedEntity.length();
-
-            if (contentSizeAfterUpload <= MAX_CHUNK_SIZE ){
-                return editExistingChunk(entity, encodedEntity, message);
-            }
-            else {
-                return save(entity, null);
-            }
-        }
     }
 
     private List<T> saveNewChunk(List<T> entities, String encodedData){
@@ -289,6 +279,95 @@ public class Connection<T> extends ConnectionInitializer<T>{
         return savedEntities;
     }
 
+    private void removeEntitiesFromChunk(MessageEntities<T> group){
+        String msgHexId = group.getMessageId();
+        long messageId = Long.parseLong(msgHexId, 16);
+
+        List<String> idsToDelete = new ArrayList<>();
+
+        for (T entity: group.getEntities()){
+            idsToDelete.add(
+                    entityManager.getPrimaryKey(entity)
+            );
+        }
+
+        tableChannel.retrieveMessageById(messageId).queue(message -> {
+            String attachmentUrl = message.getAttachments().get(0).getUrl();
+
+            String data = urlReader.fetch(attachmentUrl);
+            String[] lines = data.split("\n");
+            StringBuilder buffer = new StringBuilder();
+
+            for (String line: lines){
+                T decodedEntity = codec.decode(messageId, line);
+
+                String decodedId = entityManager.getPrimaryKey(decodedEntity);
+
+                if (!idsToDelete.contains(decodedId)){
+                    buffer
+                            .append(line)
+                            .append("\n");
+
+                }
+            }
+
+            insertChunkDataWithoutUpdate(buffer.toString(), message);
+        });
+    }
+
+    private void removeEntitiesFromChunks(List<T> entities){
+        List<String> registeredMessageIds = new ArrayList<>();
+        List<MessageEntities<T>> groups = new ArrayList<>();
+
+        for (T entity: entities){
+            String id = entityManager.getPrimaryKey(entity);
+            String msgHexId = id.split("\\.")[0];
+
+            if (!registeredMessageIds.contains(msgHexId)){
+                registeredMessageIds.add(msgHexId);
+                groups.add(new MessageEntities<>(msgHexId));
+            }
+
+
+            for (MessageEntities<T> group: groups){
+                if (group.getMessageId().equals(msgHexId)){
+                    group.add(entity);
+                    break;
+                }
+            }
+        }
+
+        for (MessageEntities<T> group: groups){
+            removeEntitiesFromChunk(group);
+        }
+
+        updateLatestChunk();
+    }
+
+    private T save(T entity, Message message){
+        // generate unique hex value
+        String hexId = generator.generateHex();
+
+        //  set id
+        entityManager.injectId(entity, hexId);
+
+        String encodedEntity = codec.encode(entity);
+
+        if (message==null){
+            return saveNewChunk(entity, encodedEntity);
+        }
+        else {
+            int contentSizeAfterUpload = message.getAttachments().get(0).getSize() + encodedEntity.length();
+
+            if (contentSizeAfterUpload <= MAX_CHUNK_SIZE ){
+                return editExistingChunk(entity, encodedEntity, message);
+            }
+            else {
+                return save(entity, null);
+            }
+        }
+    }
+
     private List<T> saveAll(List<T> entities, Message message){
         entityManager.injectIds(entities, generator);
 
@@ -300,7 +379,7 @@ public class Connection<T> extends ConnectionInitializer<T>{
         }
     }
 
-    // public methods
+    // public saving methods
 
     public T save(T entity){
         entity = save(entity, latestChunk);
@@ -318,8 +397,14 @@ public class Connection<T> extends ConnectionInitializer<T>{
         return entities;
     }
 
+    // public finding methods
+
     public List<T> findAll() {
         return cache.getAll();
+    }
+
+    public List<T> findAllByIds(List<String> ids) {
+        return cache.getAllByIds(ids);
     }
 
     public Optional<T> findEntityById(String id) {
@@ -338,10 +423,18 @@ public class Connection<T> extends ConnectionInitializer<T>{
         }
     }
 
+//    Additional methods
+
     public boolean existsById(String id){
         return findEntityById(id).isPresent();
     }
 
+    public long countEntities(){
+        return cache.size();
+    }
+
+
+//    Delete methods
 
     public void deleteAll(){
         TextChannel copy = tableChannel.createCopy().complete();
@@ -351,78 +444,6 @@ public class Connection<T> extends ConnectionInitializer<T>{
             latestChunk = null;
             cache.deleteAll();
         });
-    }
-
-    public long countEntities(){
-        return cache.size();
-    }
-
-    private void awaitThreadPool(Iterable<Thread> threads){
-        while (true){
-            boolean runningThread = false;
-
-            for (Thread thread: threads){
-                if (thread.isAlive()){
-                    runningThread = true;
-                    break;
-                }
-            }
-
-            if (!runningThread) break;
-        }
-    }
-
-
-    private void removeEntitiesFromChunk(MessageEntities<T> group){
-        String msgHexId = group.getMessageId();
-        long messageId = Long.parseLong(msgHexId, 16);
-
-
-        tableChannel.retrieveMessageById(messageId).queue(message -> {
-            StringBuilder buffer = new StringBuilder();
-
-            Message.Attachment attachment = message.getAttachments().get(0);
-            String data = urlReader.fetch(attachment.getUrl());
-
-            for (String line: data.split("\n")){
-                T decodedEntity = codec.decode(messageId, line);
-
-                if (!group.has(decodedEntity)){
-                    buffer
-                            .append(line)
-                            .append("\n");
-                }
-            }
-
-            insertChunkData(buffer.toString(), message);
-            updateLatestChunk();
-        });
-    }
-
-    private void removeEntitiesFromChunks(List<T> entities){
-        List<String> registeredMessageIds = new ArrayList<>();
-        List<MessageEntities<T>> groups = new ArrayList<>();
-
-        for (T entity: entities){
-            String id = entityManager.getPrimaryKey(entity);
-            String msgHexId = id.split("\\.")[0];
-
-            if (!registeredMessageIds.contains(msgHexId)){
-                registeredMessageIds.add(msgHexId);
-                groups.add(new MessageEntities<>(msgHexId));
-            }
-
-            for (MessageEntities<T> group: groups){
-                if (group.getMessageId().equals(msgHexId)){
-                    group.add(entity);
-                    break;
-                }
-            }
-        }
-
-        for (MessageEntities<T> group: groups){
-            removeEntitiesFromChunk(group);
-        }
     }
 
     public void deleteById(String id) {
@@ -476,6 +497,13 @@ public class Connection<T> extends ConnectionInitializer<T>{
         cache.deleteAll(entities);
     }
 
+    public void deleteAllByIds(List<String> ids) {
+        cache.deleteAllByIds(ids);
+    }
+
+
+//    Custom Query section
+
     private QueryManager<T> getQueryManager(Query<T, ?> query){
         try {
             Field field = query.getClass().getDeclaredField("queryManager");
@@ -488,8 +516,9 @@ public class Connection<T> extends ConnectionInitializer<T>{
         }
     }
 
+
     public <R> List<R> executeQuery(Query<T, R> query) {
-        List<R> resultList = new ArrayList<>();
+        List<Object> resultList = new ArrayList<>();
 
         QueryManager<T> queryManager = getQueryManager(query);
 
@@ -503,7 +532,7 @@ public class Connection<T> extends ConnectionInitializer<T>{
         for (T entity: cache.getAll()){
             if (filter.matches(entity)){
                 if (column.equals("*")){
-                    resultList.add((R) entity);
+                    resultList.add(entity);
                 }
                 else {
                     resultList.add(
@@ -513,10 +542,21 @@ public class Connection<T> extends ConnectionInitializer<T>{
             }
         }
 
-        if (dml.equals(DML.DELETE)){
 
+        if (dml.equals(DML.SELECT)){
+            return (List<R>) resultList;
+        }
+        if (dml.equals(DML.DELETE)){
+            try {
+                deleteAll((List<T>) resultList);
+            }
+            catch (ClassCastException e) {
+                throw new RuntimeException(e);
+            }
+
+            return null;
         }
 
-        return resultList;
+        return null;
     }
 }

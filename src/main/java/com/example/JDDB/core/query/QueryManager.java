@@ -34,6 +34,9 @@ public class QueryManager<T> {
     }
 
     public String getAffectedArea() {
+        if (dml.equals(DML.DELETE)){
+            return "*";
+        }
         return affectedArea;
     }
 

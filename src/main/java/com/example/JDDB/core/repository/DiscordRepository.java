@@ -4,6 +4,7 @@ package com.example.JDDB.core.repository;
 
 
 import com.example.JDDB.core.query.Query;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,11 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
 
     @Override
     public List<T> findAll() {return connection.findAll();}
+
+    @Override
+    public List<T> findAllByIds(List<String> ids) {
+        return connection.findAllByIds(ids);
+    }
 
     @Override
     public boolean existsById(String id) {
@@ -56,6 +62,12 @@ public class DiscordRepository<T> extends RepositoryInitializer<T> implements Re
     public void deleteAll(List<T> entities) {
         connection.deleteAll(entities);
     }
+
+    @Override
+    public void deleteAllById(List<String> ids) {
+        connection.deleteAllByIds(ids);
+    }
+
 
     protected <R> List<R> executeQuery(Query<T, R> query){
         return connection.executeQuery(query);

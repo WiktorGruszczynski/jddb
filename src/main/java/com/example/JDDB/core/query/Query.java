@@ -11,7 +11,6 @@ public class Query<T, R>{
     }
 
 
-
     public Query<T, R> SELECT(String column){
         queryManager.setDml(DML.SELECT);
         queryManager.setAffectedArea(column);

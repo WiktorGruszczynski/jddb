@@ -108,4 +108,28 @@ public class Cache<T>{
     public void deleteAll(List<T> entities){
         elements.removeIf(entities::contains);
     }
+
+    public void deleteAllByIds(List<String> ids) {
+        for (T entity : elements){
+            String id = entityManager.getPrimaryKey(entity);
+
+            if (ids.contains(id)){
+                elements.remove(entity);
+            }
+        }
+    }
+
+    public List<T> getAllByIds(List<String> ids) {
+        List<T> result = new ArrayList<>();
+
+        for (T entity : elements){
+            if (ids.contains(
+                    entityManager.getPrimaryKey(entity)
+            )){
+                result.add(entity);
+            }
+        }
+
+        return result;
+    }
 }

@@ -19,6 +19,8 @@ public interface RepositoryMethods<T>{
 
     List<T> findAll();
 
+    List<T> findAllByIds(List<String> ids);
+
     long count();
 
     void deleteById(String id);
@@ -28,4 +30,6 @@ public interface RepositoryMethods<T>{
     void deleteAll();
 
     void deleteAll(List<T> entities);
+
+    void deleteAllById(List<String> ids);
 }

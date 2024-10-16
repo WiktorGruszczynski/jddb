@@ -19,6 +19,10 @@ public class MessageEntities<T>{
         entities.add(entity);
     }
 
+    public List<T> getEntities(){
+        return entities;
+    }
+
     public boolean has(T entity){
         return entities.contains(entity);
     }

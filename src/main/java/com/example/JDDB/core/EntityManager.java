@@ -211,19 +211,18 @@ public class EntityManager<T>{
         throw new RuntimeException("Primary key missing");
     }
 
-    public <R> R getValueByColumnName(Object entity, String columnName) {
+    public Object getValueByColumnName(Object entity, String columnName) {
         for (Field field: entityType.getDeclaredFields()){
             field.setAccessible(true);
 
             try {
-                if (
-                        (
-                            field.isAnnotationPresent(Column.class) &&
-                            field.getAnnotation(Column.class).name().equals(columnName)
-                        ) ||
-                            field.getName().equals(columnName)
-                ){
-                    return (R) field.get(entity);
+                if (field.isAnnotationPresent(Column.class)) {
+                    if (field.getAnnotation(Column.class).name().equals(columnName)){
+                        return field.get(entity);
+                    }
+                }
+                else if (field.getName().equals(columnName)){
+                    return field.get(entity);
                 }
 
             } catch (IllegalAccessException e) {

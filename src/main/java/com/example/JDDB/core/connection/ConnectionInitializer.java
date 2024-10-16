@@ -1,9 +1,8 @@
 package com.example.JDDB.core.connection;
 
 import com.example.JDDB.core.*;
-import com.example.JDDB.core.query.Parser;
-import com.example.JDDB.core.query.Tokenizer;
 import com.example.JDDB.utils.Generator;
+import com.example.JDDB.utils.ThreadManager;
 import com.example.JDDB.utils.UrlReader;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
@@ -19,6 +18,7 @@ public class ConnectionInitializer<T>{
     protected TextChannel tableChannel;
     protected final UrlReader urlReader;
     protected final Cache<T> cache;
+    protected final ThreadManager threadManager;
 
 
     public ConnectionInitializer(Class<?> entityType){
@@ -30,6 +30,7 @@ public class ConnectionInitializer<T>{
         this.tableChannel = initTableChannel();
         this.urlReader = new UrlReader();
         this.cache = new Cache<>(entityType);
+        this.threadManager = new ThreadManager();
     }
 
     private Generator initGenerator(){
