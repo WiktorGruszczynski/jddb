@@ -70,22 +70,19 @@ public class Cache<T>{
         return null;
     }
 
-    public void deleteBy(String keyName, Object value) throws NoSuchFieldException{
+    public void deleteManyBy(String keyName, Object value) throws NoSuchFieldException{
         Field field = persistanceClass.getDeclaredField(keyName);
         field.setAccessible(true);
 
-        try {
-            for (int i=0; i< elements.size(); i++){
-                T element = elements.get(i);
-
-                if (field.get(element).equals(value)){
-                    elements.remove(i);
-                }
+        elements.removeIf(element -> {
+            try {
+                return field.get(element).equals(value);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
+
 
     public void deleteOneBy(String keyName, Object value) throws NoSuchFieldException{
         Field field = persistanceClass.getDeclaredField(keyName);
@@ -105,8 +102,14 @@ public class Cache<T>{
         }
     }
 
-    public void deleteAll(List<T> entities){
-        elements.removeIf(entities::contains);
+    public void deleteOneById(String value){
+        elements.removeIf(element -> {
+            try {
+                return primaryKeyField.get(element).equals(value);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public void deleteAllByIds(List<String> ids) {

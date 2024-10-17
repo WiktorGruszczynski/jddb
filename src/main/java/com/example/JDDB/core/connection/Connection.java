@@ -469,13 +469,7 @@ public class Connection<T> extends ConnectionInitializer<T>{
 
         }).start();
 
-        try {
-            cache.deleteOneBy("id", id);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(
-                    new NoPrimaryKeyException()
-            );
-        }
+        cache.deleteOneById(id);
     }
 
     public void delete(T entity) {
