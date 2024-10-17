@@ -195,20 +195,36 @@ public class EntityManager<T>{
         }
     }
 
-    public String getPrimaryKey(T entity) {
+    private Field getIdField(T entity){
         for (Field field: entityType.getDeclaredFields()){
             if (field.isAnnotationPresent(Id.class)){
                 field.setAccessible(true);
-                try {
-                    return String.valueOf(field.get(entity));
 
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
+                return field;
             }
         }
 
-        throw new RuntimeException("Primary key missing");
+        throw new RuntimeException("Missing @Id annotation");
+    }
+
+
+    // primaryKey = hexMessageId + "." + hexChunkId
+    public String getPrimaryKey(T entity) {
+        Field idField = getIdField(entity);
+
+        try {
+            return (String) idField.get(entity);
+
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public long getChunkId(T entity) {
+        String primaryKey = getPrimaryKey(entity);
+        String hexChunkId = primaryKey.split("\\.")[1];
+
+        return Long.parseLong(hexChunkId, 16);
     }
 
     public Object getValueByColumnName(Object entity, String columnName) {

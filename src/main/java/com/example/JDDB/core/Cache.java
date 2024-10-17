@@ -110,13 +110,11 @@ public class Cache<T>{
     }
 
     public void deleteAllByIds(List<String> ids) {
-        for (T entity : elements){
-            String id = entityManager.getPrimaryKey(entity);
-
-            if (ids.contains(id)){
-                elements.remove(entity);
-            }
-        }
+        elements.removeIf(entity ->
+                ids.contains(
+                        entityManager.getPrimaryKey(entity)
+                )
+        );
     }
 
     public List<T> getAllByIds(List<String> ids) {

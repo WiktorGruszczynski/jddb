@@ -2,7 +2,7 @@ package com.example.JDDB.core.connection;
 
 
 import com.example.JDDB.core.connection.components.Chunk;
-import com.example.JDDB.core.connection.components.MessageEntities;
+import com.example.JDDB.core.connection.components.MessageEntityIds;
 import com.example.JDDB.core.query.Filter;
 import com.example.JDDB.core.query.Query;
 import com.example.JDDB.core.query.QueryManager;
@@ -279,35 +279,27 @@ public class Connection<T> extends ConnectionInitializer<T>{
         return savedEntities;
     }
 
-    private void removeEntitiesFromChunk(MessageEntities<T> group){
-        String msgHexId = group.getMessageId();
-        long messageId = Long.parseLong(msgHexId, 16);
+    private void removeEntitiesFromChunk(MessageEntityIds<T> group){
+        long messageId = group.getMessageId();
+        List<Long> idsToDelete = group.getEntityIds();
 
-        List<String> idsToDelete = new ArrayList<>();
-
-        for (T entity: group.getEntities()){
-            idsToDelete.add(
-                    entityManager.getPrimaryKey(entity)
-            );
-        }
 
         tableChannel.retrieveMessageById(messageId).queue(message -> {
             String attachmentUrl = message.getAttachments().get(0).getUrl();
-
             String data = urlReader.fetch(attachmentUrl);
-            String[] lines = data.split("\n");
             StringBuilder buffer = new StringBuilder();
 
-            for (String line: lines){
+            String[] lines = data.split("\n");
+
+            for (String line : lines){
                 T decodedEntity = codec.decode(messageId, line);
+                long entityChunkId = entityManager.getChunkId(decodedEntity);
 
-                String decodedId = entityManager.getPrimaryKey(decodedEntity);
 
-                if (!idsToDelete.contains(decodedId)){
+                if (!idsToDelete.contains(entityChunkId)){
                     buffer
                             .append(line)
                             .append("\n");
-
                 }
             }
 
@@ -315,34 +307,35 @@ public class Connection<T> extends ConnectionInitializer<T>{
         });
     }
 
-    private void removeEntitiesFromChunks(List<T> entities){
-        List<String> registeredMessageIds = new ArrayList<>();
-        List<MessageEntities<T>> groups = new ArrayList<>();
+    private void removeEntitiesFromChunks(List<String> ids){
+        List<Long> messageIds = new ArrayList<>();
+        List<MessageEntityIds<T>> messageEntitiesList = new ArrayList<>();
 
-        for (T entity: entities){
-            String id = entityManager.getPrimaryKey(entity);
+        for (String id: ids){
             String msgHexId = id.split("\\.")[0];
+            String entityHexId = id.split("\\.")[1];
+            long messageId = Long.parseLong(msgHexId, 16);
+            long entityChunkId = Long.parseLong(entityHexId, 16);
 
-            if (!registeredMessageIds.contains(msgHexId)){
-                registeredMessageIds.add(msgHexId);
-                groups.add(new MessageEntities<>(msgHexId));
+            if (!messageIds.contains(messageId)){
+                messageIds.add(messageId);
+                messageEntitiesList.add(new MessageEntityIds<>(messageId));
             }
 
-
-            for (MessageEntities<T> group: groups){
-                if (group.getMessageId().equals(msgHexId)){
-                    group.add(entity);
-                    break;
+            for (MessageEntityIds<T> msgEntities: messageEntitiesList) {
+                if (msgEntities.getMessageId() == messageId){
+                    msgEntities.add(entityChunkId);
                 }
             }
         }
 
-        for (MessageEntities<T> group: groups){
-            removeEntitiesFromChunk(group);
+        for (MessageEntityIds<T> msgEntities: messageEntitiesList){
+            removeEntitiesFromChunk(msgEntities);
         }
 
         updateLatestChunk();
     }
+
 
     private T save(T entity, Message message){
         // generate unique hex value
@@ -433,7 +426,6 @@ public class Connection<T> extends ConnectionInitializer<T>{
         return cache.size();
     }
 
-
 //    Delete methods
 
     public void deleteAll(){
@@ -493,11 +485,20 @@ public class Connection<T> extends ConnectionInitializer<T>{
     }
 
     public void deleteAll(List<T> entities) {
-        removeEntitiesFromChunks(entities);
-        cache.deleteAll(entities);
+        List<String> ids = new ArrayList<>();
+
+        for (T entity: entities){
+            ids.add(
+                    entityManager.getPrimaryKey(entity)
+            );
+        }
+
+        removeEntitiesFromChunks(ids);
+        cache.deleteAllByIds(ids);
     }
 
     public void deleteAllByIds(List<String> ids) {
+        removeEntitiesFromChunks(ids);
         cache.deleteAllByIds(ids);
     }
 
