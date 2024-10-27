@@ -1,7 +1,7 @@
 package com.example.JDDB.core.connection;
 
 
-import com.example.JDDB.app.user.User;
+
 import com.example.JDDB.core.connection.components.Chunk;
 import com.example.JDDB.core.connection.components.MessageEntityIds;
 import com.example.JDDB.core.query.Filter;
@@ -9,7 +9,6 @@ import com.example.JDDB.core.query.Query;
 import com.example.JDDB.core.query.QueryManager;
 import com.example.JDDB.core.query.Sorter;
 import com.example.JDDB.data.enums.query.DML;
-import com.example.JDDB.data.exceptions.NoPrimaryKeyException;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -19,6 +18,8 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -81,7 +82,12 @@ public class Connection<T> extends ConnectionInitializer<T>{
         long t0 = new Date().getTime();
         loadCache();
         long t1 = new Date().getTime();
-        System.out.println(entityType.getName() + " - loaded cache in " + (t1-t0) + " ms");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        ZonedDateTime now = ZonedDateTime.now();
+        String formattedDate = now.format(formatter);
+
+        System.out.println(formattedDate + "  INFO : " + entityType.getName() + " - loaded cache in " + (t1-t0) + " ms");
     }
 
 
