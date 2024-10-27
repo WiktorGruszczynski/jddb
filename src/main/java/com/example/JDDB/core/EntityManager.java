@@ -151,7 +151,6 @@ public class EntityManager<T>{
 
     public void injectField(T entity, Field field, String strValue) throws IllegalAccessException {
         Class<?> type = field.getType();
-        boolean nullValue = strValue.isEmpty();
 
         if (!isTypeAllowed(type)){
             throw new RuntimeException("Type not allowed - " + type.getSimpleName());
@@ -161,32 +160,32 @@ public class EntityManager<T>{
         if (type == String.class){
             field.set(entity, strValue);
         }
-        else if (type == Character.class){
+        else if (type == Character.class || type == char.class){
             field.set(entity, strValue.charAt(0));
         }
-        else if (type == Boolean.class){
+        else if (type == Boolean.class || type == boolean.class){
             field.set(entity, strValue.equals("1"));
         }
-        else if (type == Byte.class){
+        else if (type == Byte.class || type == byte.class){
             field.set(entity, Byte.valueOf(strValue));
         }
-        else if (type == Short.class){
+        else if (type == Short.class || type == short.class){
             field.set(entity, Short.valueOf(strValue));
         }
-        else if (type == Integer.class){
+        else if (type == Integer.class || type == int.class){
             field.set(entity, Integer.valueOf(strValue));
         }
-        else if (type == Long.class){
+        else if (type == Long.class || type == long.class){
             field.set(entity, Long.valueOf(strValue));
         }
-        else if (type == Float.class){
+        else if (type == Float.class || type == float.class){
             field.set(entity, Float.valueOf(strValue));
         }
-        else if (type == Double.class){
+        else if (type == Double.class || type == double.class){
             field.set(entity, Double.valueOf(strValue));
         }
         else if (type == Date.class){
-            if (nullValue){
+            if (strValue.isEmpty()){
                 field.set(entity, null);
             }
             else {

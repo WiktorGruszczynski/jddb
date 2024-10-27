@@ -1,6 +1,7 @@
 package com.example.JDDB.core.connection;
 
 
+import com.example.JDDB.app.user.User;
 import com.example.JDDB.core.connection.components.Chunk;
 import com.example.JDDB.core.connection.components.MessageEntityIds;
 import com.example.JDDB.core.query.Filter;
@@ -69,6 +70,8 @@ public class Connection<T> extends ConnectionInitializer<T>{
         for (Chunk chunk: chunks){
             for (String row: chunk.getRows()){
                 T entity = codec.decode(chunk.getMessageIdLong(), row);
+
+
                 cache.add(entity);
             }
         }
