@@ -1,6 +1,7 @@
 package com.example.JDDB.core.connection;
 
 import com.example.JDDB.core.*;
+import com.example.JDDB.data.enums.DataType;
 import com.example.JDDB.utils.Generator;
 import com.example.JDDB.utils.ThreadManager;
 import com.example.JDDB.utils.UrlReader;
@@ -58,7 +59,7 @@ public class ConnectionInitializer<T>{
             StringBuilder builder = new StringBuilder();
             for (Field field : entityType.getDeclaredFields()) {
                 String columnName = entityManager.getColumnName(field);
-                String type = field.getType().getSimpleName();
+                String type = DataType.getTypeName(field.getType());
 
                 builder
                         .append(columnName)
