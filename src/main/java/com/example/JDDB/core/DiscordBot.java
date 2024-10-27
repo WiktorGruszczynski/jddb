@@ -24,6 +24,7 @@ public class DiscordBot {
     private static List<TextChannel> textChannels = new ArrayList<>();
 
     private static final String TABLES = "tables";
+    private static final String SCHEMAS = "schemas";
 
 
     static {
@@ -37,10 +38,6 @@ public class DiscordBot {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static String getToken(){
-        return token;
     }
 
 
@@ -79,6 +76,10 @@ public class DiscordBot {
     private static void createCategories(){
         if (!isCategory(TABLES)){
             guild.createCategory(TABLES).queue();
+        }
+
+        if (!isCategory(SCHEMAS)){
+            guild.createCategory(SCHEMAS).queue();
         }
     }
 

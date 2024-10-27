@@ -13,19 +13,23 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class EntityManager<T>{
     private final Class<?> entityType;
     private final GeneratorType generatorType;
     private final String tableName;
+    private final HashMap<String, Field> columnsMap;
 
 
     public EntityManager(Class<?> entityType) {
         this.entityType = entityType;
         this.generatorType = initGeneratorType();
         this.tableName = initTableName();
+        this.columnsMap = initColumns();
     }
 
     @NotNull
@@ -36,6 +40,21 @@ public class EntityManager<T>{
         else {
             return getSqlName(entityType.getSimpleName());
         }
+    }
+
+    private HashMap<String, Field> initColumns(){
+        HashMap<String, Field> columns = new HashMap<>();
+
+        for (Field field : entityType.getDeclaredFields()) {
+            if (field.isAnnotationPresent(Column.class)){
+                columns.put(field.getAnnotation(Column.class).name(), field);
+            }
+            else {
+                columns.put(field.getName(), field);
+            }
+        }
+
+        return columns;
     }
 
     private String getSqlName(String name){
@@ -226,19 +245,23 @@ public class EntityManager<T>{
         return Long.parseLong(hexChunkId, 16);
     }
 
-    public Object getValueByColumnName(Object entity, String columnName) {
-        for (Field field: entityType.getDeclaredFields()){
-            field.setAccessible(true);
+    public String getColumnName(Field field){
+        if (field.isAnnotationPresent(Column.class)){
+            return field.getAnnotation(Column.class).name();
+        }
+        else {
+            return field.getName();
+        }
+    }
 
+    public Object getValueByColumnName(Object entity, String columnName) {
+        Field column = columnsMap.get(columnName);
+
+        if (column != null){
             try {
-                if (field.isAnnotationPresent(Column.class)) {
-                    if (field.getAnnotation(Column.class).name().equals(columnName)){
-                        return field.get(entity);
-                    }
-                }
-                else if (field.getName().equals(columnName)){
-                    return field.get(entity);
-                }
+                column.setAccessible(true);
+
+                return column.get(entity);
 
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -249,4 +272,6 @@ public class EntityManager<T>{
                 new NoSuchFieldException()
         );
     }
+
+
 }

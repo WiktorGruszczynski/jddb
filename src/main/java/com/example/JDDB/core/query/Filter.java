@@ -133,6 +133,7 @@ public class Filter<T> {
         for (int i=0; i<comparisons.size(); ++i){
             Comparison comparison = comparisons.get(i);
 
+
             Object foundValue = entityManager.getValueByColumnName(entity, comparison.getColumn());
             String conditionValue = comparison.getConditionValue();
             String comparator = comparison.getComparator();
