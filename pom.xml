@@ -8,11 +8,15 @@
 		<version>3.3.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
+
+	<groupId>org.my_tools</groupId>
 	<artifactId>JDDB</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>JDDB</name>
+
+
+	<name>jddb</name>
 	<description>Demo project for Spring Boot</description>
+
 	<url/>
 	<licenses>
 		<license/>
