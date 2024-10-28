@@ -273,5 +273,11 @@ public class EntityManager<T>{
         );
     }
 
+    public boolean isColumnNullable(Field field){
+        if (field.isAnnotationPresent(Column.class)){
+            return field.getAnnotation(Column.class).nullale();
+        }
+        return !field.isAnnotationPresent(Id.class);
+    }
 
 }

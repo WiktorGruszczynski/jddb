@@ -54,25 +54,43 @@ public class ConnectionInitializer<T>{
     private void initSchemaChannel(){
         TextChannel schemaChannel = initTextChannel("schemas", entityManager.getTableName());
         List<Message> history = schemaChannel.getHistory().retrievePast(1).complete();
+        String content = generateSchemaMessageContent();
 
         if (history.isEmpty()){
-            StringBuilder builder = new StringBuilder();
-            for (Field field : entityType.getDeclaredFields()) {
-                String columnName = entityManager.getColumnName(field);
-                String type = DataType.getTypeName(field.getType());
+            schemaChannel.sendMessage(content).queue();
+        }
+        else {
+            Message msg = history.get(0);
 
-                builder
-                        .append(columnName)
-                        .append(":")
-                        .append(type)
-                        .append("\n")
-                ;
+            if (!msg.getContentRaw().equals(content)){
+                msg.editMessage(content).queue();
             }
+        }
+    }
 
-            schemaChannel.sendMessage(builder.toString()).queue();
+    private String generateSchemaMessageContent(){
+        StringBuilder builder = new StringBuilder();
+
+        for (Field field : entityType.getDeclaredFields()) {
+            String columnName = entityManager.getColumnName(field);
+            String type = DataType.getTypeName(field.getType());
+            boolean nullable = entityManager.isColumnNullable(field);
+
+            builder
+                    .append(columnName)
+                    .append(":")
+                    .append("  type=")
+                    .append(type)
+                    .append(",  nullable=")
+                    .append(nullable)
+                    .append("\n")
+            ;
         }
 
+        return builder.toString();
     }
+
+
     private TextChannel initTextChannel(String categoryName, String channelName){
         Category category = DiscordBot.getCategoryByName(categoryName);
         TextChannel textChannel = DiscordBot.getTextChannel(category, channelName);
