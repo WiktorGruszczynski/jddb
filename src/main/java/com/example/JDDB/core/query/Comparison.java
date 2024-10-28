@@ -26,9 +26,7 @@ public class Comparison {
         }
 
         if (this.comparator == null){
-            throw new RuntimeException(
-                    new InvalidQueryException()
-            );
+            throw new InvalidQueryException("Unknown comparator");
         }
 
         String[] arguments = comparisonString.split(comparator);

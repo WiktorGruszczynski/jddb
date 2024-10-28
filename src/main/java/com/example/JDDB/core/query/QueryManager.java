@@ -10,9 +10,13 @@ public class QueryManager<T> {
     private Filter<T> filter;
     private Sorter sorter;
     private String affectedArea;
+    private long limit;
+    private long offset;
 
     public QueryManager(){
         this.filter = new Filter<>();
+        this.limit = Long.MAX_VALUE;
+        this.offset = 0;
     }
 
     public DML getDml() {
@@ -54,5 +58,21 @@ public class QueryManager<T> {
 
     public void setSorter(Sorter sorter) {
         this.sorter = sorter;
+    }
+
+    public void setLimit(long limit) {
+        this.limit = limit;
+    }
+
+    public long getLimit() {
+        return limit;
+    }
+
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+
+    public long getOffset() {
+        return offset;
     }
 }

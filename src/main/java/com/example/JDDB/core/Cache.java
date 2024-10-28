@@ -28,9 +28,7 @@ public class Cache<T>{
             }
         }
 
-        throw new RuntimeException(
-                new NoPrimaryKeyException()
-        );
+        throw new NoPrimaryKeyException();
     }
 
     public long size(){

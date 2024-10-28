@@ -271,10 +271,20 @@ public class EntityManager<T>{
     }
 
     public boolean isColumnNullable(Field field){
-        if (field.isAnnotationPresent(Column.class)){
-            return field.getAnnotation(Column.class).nullale();
+        if (isPrimaryKey(field)){
+            return false;
         }
-        return !field.isAnnotationPresent(Id.class);
+        else {
+            if (field.isAnnotationPresent(Column.class)){
+                return field.getAnnotation(Column.class).nullale();
+            }
+            else {
+                return true;
+            }
+        }
     }
 
+    public boolean isPrimaryKey(Field field) {
+        return field.isAnnotationPresent(Id.class);
+    }
 }

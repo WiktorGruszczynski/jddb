@@ -1,4 +1,4 @@
 package com.example.JDDB.data.exceptions;
 
-public class InvalidResponseException extends Exception{
+public class InvalidResponseException extends RuntimeException{
 }

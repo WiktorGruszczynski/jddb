@@ -524,7 +524,6 @@ public class Connection<T> extends ConnectionInitializer<T>{
 
     public <R> List<R> executeQuery(Query<T, R> query) {
         List<Object> resultList = new ArrayList<>();
-
         QueryManager<T> queryManager = getQueryManager(query);
 
         DML dml = queryManager.getDml();
@@ -532,10 +531,27 @@ public class Connection<T> extends ConnectionInitializer<T>{
         Filter<T> filter = queryManager.getFilter();
         Sorter sorter = queryManager.getSorter();
 
+        long offset = queryManager.getOffset();
+        long limit = queryManager.getLimit();
+
+        long counter = 0;
+
         filter.setEntityManager(entityManager);
 
+
+
         for (T entity: cache.getAll()){
+            if (counter == limit) break;
+
             if (filter.matches(entity)){
+                if (offset>0){
+                    offset--;
+                    continue;
+                }
+
+                counter++;
+
+
                 if (column.equals("*")){
                     resultList.add(entity);
                 }

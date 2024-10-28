@@ -31,9 +31,7 @@ public class Parser<T> {
             }
         }
 
-        throw new RuntimeException(
-                new InvalidQueryException()
-        );
+        throw new InvalidQueryException("Unknown dml type");
     }
 
     public Filter<T> getFilter(){

@@ -83,8 +83,13 @@ public class ConnectionInitializer<T>{
                     .append(type)
                     .append(",  nullable=")
                     .append(nullable)
-                    .append("\n")
             ;
+
+            if (entityManager.isPrimaryKey(field)){
+                builder.append(",  PK");
+            }
+
+            builder.append("\n");
         }
 
         return builder.toString();

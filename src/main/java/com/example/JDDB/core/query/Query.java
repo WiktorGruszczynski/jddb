@@ -2,6 +2,8 @@ package com.example.JDDB.core.query;
 
 import com.example.JDDB.data.enums.query.DML;
 import com.example.JDDB.data.enums.query.SortDirection;
+import com.example.JDDB.data.exceptions.InvalidQueryException;
+
 
 public class Query<T, R>{
     private QueryManager<T> queryManager;
@@ -42,6 +44,31 @@ public class Query<T, R>{
                 new Sorter(columnName, sortDirection)
         );
 
+        return this;
+    }
+
+
+
+    public Query<T, R> LIMIT(long offset, long limit){
+        if (limit <= 0){
+            throw new InvalidQueryException(
+                    "Limit must be greater than or equal to 0"
+            );
+        }
+
+        if (offset < 0){
+            throw new InvalidQueryException(
+                    "Offset must be greater than 0"
+            );
+        }
+
+        queryManager.setOffset(offset);
+        queryManager.setLimit(limit);
+        return this;
+    }
+
+    public Query<T, R> LIMIT(long limit){
+        LIMIT(0, limit);
         return this;
     }
 
