@@ -32,5 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 
-**/com/example/JDDB/app/
+**/jddb/app/
 src/main/resources/**
