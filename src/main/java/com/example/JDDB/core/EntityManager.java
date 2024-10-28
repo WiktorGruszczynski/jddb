@@ -143,10 +143,6 @@ public class EntityManager<T>{
         }
     }
 
-    private boolean isTypeAllowed(Class<?> type){
-        return DataType.contains(type);
-    }
-
 
     public void injectId(T entity, String id){
         for (Field field: entityType.getDeclaredFields()){
@@ -170,10 +166,6 @@ public class EntityManager<T>{
 
     public void injectField(T entity, Field field, String strValue) throws IllegalAccessException {
         Class<?> type = field.getType();
-
-        if (!isTypeAllowed(type)){
-            throw new RuntimeException("Type not allowed - " + type.getSimpleName());
-        }
 
 
         if (type == String.class){
@@ -208,8 +200,13 @@ public class EntityManager<T>{
                 field.set(entity, null);
             }
             else {
-                field.set(entity, new Date(Long.parseLong(strValue)));
+                field.set(entity, new Date(
+                        Long.parseLong(strValue))
+                );
             }
+        }
+        else {
+            throw new RuntimeException("Type not allowed - " + type.getSimpleName());
         }
     }
 

@@ -34,15 +34,6 @@ public enum DataType {
         return type;
     }
 
-    public static boolean contains(Class<?> type){
-        for (DataType dataType: values()){
-            if (dataType.getType() == type){
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     public static String getTypeName(Class<?> type){
         for (DataType dataType: values()){
@@ -52,7 +43,7 @@ public enum DataType {
         }
 
         throw new RuntimeException(
-                new InvalidTypeException()
+                new InvalidTypeException(type.getName())
         );
     }
 }
